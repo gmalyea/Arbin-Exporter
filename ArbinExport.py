@@ -7,7 +7,6 @@ import datetime
 import dateutil
 import os
 from ArbinTestItem import ArbinTestItem
-#from openpyxl.utils.dataframe import dataframe_to_rows
 
 
 class ArbinExport( object ):
@@ -27,70 +26,77 @@ class ArbinExport( object ):
         self.ws3 = self.wb.create_sheet("Statistics")
 
 
-    def exportGlobalInfo( self ):
-
-        self.ws1.append(['','','','TEST REPORT'])
-        self.ws1.append(['','','Test Name'])
-        self.ws1.append(['','','Export Time'])
+    def saveWorkbook( self, path ):
         
-        self.ws1.append(['Channel','Start DateTime','Schedule File Name','Creator','Comments',
-                        'Software Version','Schedule Version','MASS(g)','Specific Capacity(Ah/g)',
-                        'Capacity(Ah)','Item ID','Has Aux','Has Special','Log Aux Data Flag','Log Special Flag'])
+        self.exportGlobalInfoSheet( self.ws1 )
+        self.exportChannelSheet( self.ws2 )
+        self.exportStatisticsSheet( self.ws3 )
+        
+        if( not os.path.isdir(path) ): os.makedirs(path)
+        self.wb.save( path + self.fileName )
+    
+        
 
-        greenFill = openpyxl.styles.fills.PatternFill(start_color='CEFFCE', end_color='CEFFCE', fill_type='solid')
-        for cell in list(self.ws1.rows)[3]:
-            cell.fill = greenFill
+    def exportGlobalInfoSheet( self, worksheet ):
 
-        self.ws1.append([self.arbinTestItem.testIVChannelList_df.at[0,'IV_Ch_ID'],
-                        self.arbinTestItem.testIVChannelList_df.at[0,'First_Start_DateTime'],
-                        self.arbinTestItem.testIVChannelList_df.at[0,'Schedule_File_Name'],
-                        '', # Creator
-                        '', # Comments
-                        self.arbinTestItem.testList_df.at[0,'Software_Version'],
-                        self.arbinTestItem.testIVChannelList_df.at[0,'Schedule_Version'],
-                        self.arbinTestItem.testIVChannelList_df.at[0,'SpecificMASS'],
-                        self.arbinTestItem.testIVChannelList_df.at[0,'SpecificCapacity'],
-                        self.arbinTestItem.testIVChannelList_df.at[0,'Capacity'],
-                        self.arbinTestItem.testIVChannelList_df.at[0,'Item_ID'],
-                        self.arbinTestItem.testIVChannelList_df.at[0,'Has_Aux'],
-                        self.arbinTestItem.testIVChannelList_df.at[0,'Has_Special'],
-                        self.arbinTestItem.testIVChannelList_df.at[0,'Log_Aux_Data_Flag'],
-                        self.arbinTestItem.testIVChannelList_df.at[0,'Log_Special_Data_Flag']])
-            
+        worksheet.append(['','','','TEST REPORT'])
+        worksheet.append(['','','Test Name'])
+        worksheet.append(['','','Export Time'])
+        
+        for r in openpyxl.utils.dataframe.dataframe_to_rows(self.arbinTestItem.dbGlobalInfo_df, index=False, header=True):
+            worksheet.append(r)
+             
+        # Green header background        
+        self.backgroundColor( worksheet, 3, 'CEFFCE' )
+        
+        # Resize cells to fit  
+        self.resizeCells( worksheet, slice(3,5) )
+             
+
+    def exportChannelSheet( self, worksheet ):
+        
+        for r in openpyxl.utils.dataframe.dataframe_to_rows(self.arbinTestItem.dbRawData_df, index=False, header=True):
+            worksheet.append(r)
+    
+        # Blue header background
+        self.backgroundColor( worksheet, 0, 'CEFFFF' )
+    
+        # Resize cells to fit
+        self.resizeCells( worksheet, slice(0,2) )
+    
+    
+    def exportStatisticsSheet( self, worksheet ):
+        
+        for r in openpyxl.utils.dataframe.dataframe_to_rows(self.arbinTestItem.dbCycleStatistics_df, index=False, header=True):
+            worksheet.append(r)
+    
+        # Blue header background
+        self.backgroundColor( worksheet, 0, 'CEFFFF' )
+    
+        # Resize cells to fit
+        self.resizeCells( worksheet, slice(0,2) )    
+    
+    
+    
+    # --------------------------------------------------------------------------------------
+    # Utilities
+    # --------------------------------------------------------------------------------------
+    def backgroundColor( self, worksheet, row, color ):
+    
+        backgroundFill = openpyxl.styles.fills.PatternFill(start_color=color, end_color=color, fill_type='solid')
+        for cell in list(worksheet.rows)[row]:
+            cell.fill = backgroundFill
+    
+    
+    def resizeCells( self, worksheet, rows_to_check ):
+    
         dims = {}
-        for row in list (self.ws1.rows)[3:5]:
+        for row in list (worksheet.rows)[rows_to_check]:
             for cell in row:
                 if cell.value:
                     dims[cell.column_letter] = max((dims.get(cell.column_letter, 0), len(str(cell.value)))) 
         for col, value in dims.items():
-            self.ws1.column_dimensions[col].width = value
-    
-            
-
-
-    
-    def exportChannelData( self ):
-        self.ws2.append(['Data_Point','Date_Time','Test_Times(s)','Step_Times(s)','Cycle_Index',
-                        'Step_Index','Current(A)','Voltage(V)','Power(W)','Charge_Capacity(Ah)',
-                        'Discharge_Capacity(Ah)','Charge_Energy(Wh)','Discharge_Energy(Wh)',
-                        'ACR(Ohm)','dV/dt(V/s)','Internal_Resistance(Ohm)','dQ/dV(Ah/V)','dV/dQ(V/Ah)',
-                        'Aux_Voltage_3(V)','Aux_dV/dt_3(V)','Aux_Temperature_3(C)','Aux_dT/dt_3(C)'])
-        
-        blueFill = openpyxl.styles.fills.PatternFill(start_color='CEFFFF', end_color='CEFFFF', fill_type='solid')
-        for cell in list(self.ws2.rows)[0]:
-            cell.fill = blueFill
-    
-    
-        
-        for r in openpyxl.utils.dataframe.dataframe_to_rows(self.arbinTestItem.dataIVBasic_df, index=True, header=True):
-            self.ws2.append(r)
-    
-    
-    def saveWorkbook( self, path ):
-        
-        if( not os.path.isdir(path) ): os.makedirs(path)
-        
-        self.wb.save( path + self.fileName )
+            worksheet.column_dimensions[col].width = value
         
         
     

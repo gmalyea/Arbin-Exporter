@@ -5,45 +5,48 @@ import dateutil
 import os
 
 
-database_master = 'ArbinPro8MasterInfo'
-database_info = 'ArbinPro8Info_1'
-database_data = 'ArbinPro8Data_1'
+DATABASE_MASTER = 'ArbinPro8MasterInfo'
+DATABASE_INFO = 'ArbinPro8Info_1'
+DATABASE_DATA = 'ArbinPro8Data_1'
 
 class ArbinDatabase( object ):
 
     def __init__( self, server, username, password ):
         
         try:
-            self.conn_master = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database_master+';UID='+username+';PWD='+password)
+            self.conn_master = pyodbc.connect( 'DRIVER={ODBC Driver 17 for SQL Server}; SERVER='+server+'; DATABASE='+DATABASE_MASTER+'; UID='+username+'; PWD='+password )
         except Exception as e:
             print( "Could not connect to SQL Server, check the connection setting and try again." )
 
         try:
-            self.conn_info = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database_info+';UID='+username+';PWD='+password)
+            self.conn_info = pyodbc.connect( 'DRIVER={ODBC Driver 17 for SQL Server}; SERVER='+server+'; DATABASE='+DATABASE_INFO+'; UID='+username+'; PWD='+password )
         except Exception as e:
             print( "Could not connect to SQL Server, check the connection setting and try again." )
             
         try:
-            self.conn_data = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database_data+';UID='+username+';PWD='+password)
+            self.conn_data = pyodbc.connect( 'DRIVER={ODBC Driver 17 for SQL Server}; SERVER='+server+'; DATABASE='+DATABASE_DATA+'; UID='+username+'; PWD='+password )
         except Exception as e:
             print( "Could not connect to SQL Server, check the connection setting and try again." )
 
 
-
-    def allTests( self ):
+    def testList( self ):
         query = ("SELECT Test_ID from TestList_Table")
         return pd.read_sql( query, self.conn_master )
 
-    def testList( self, testID ):
+
+    def testListFor( self, testID ):
         query = ("SELECT * from TestList_Table WHERE [Test_ID] = " + str(testID))
         return pd.read_sql( query, self.conn_master )
 
+
     def dataIVBasic( self, testID ):
-        query = ("SELECT [Data_Point], [Date_Time], [Test_Time], [Step_Time], [Cycle_ID], [Step_ID], [Current] as [Current (A)], [Voltage] as [Voltage (V)],"
-                    "[Charge_Capacity] as [Charge_Capacity (Ah)], [Discharge_Capacity] as [Discharge_Capacity (Ah)], [Charge_Energy] as [Charge_Energy (Wh)],"
-                    "[Discharge_Energy] as [Discharge_Energy (Wh)] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY date_time")
+        query = ( "SELECT * FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY date_time" )
+        #query = ("SELECT [Data_Point], [Date_Time], [Test_Time], [Step_Time], [Cycle_ID], [Step_ID], [Current] as [Current (A)], [Voltage] as [Voltage (V)],"
+        #            "[Charge_Capacity] as [Charge_Capacity (Ah)], [Discharge_Capacity] as [Discharge_Capacity (Ah)], [Charge_Energy] as [Charge_Energy (Wh)],"
+        #            "[Discharge_Energy] as [Discharge_Energy (Wh)] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY date_time")
         
         return pd.read_sql( query, self.conn_data )
+
         
     def dataIVExtended( self, testID ):
         #query = ( ("SELECT [Date_Time], [6] as [ACR(Ohm)], [27] as [dV/dt(V/s)],[30] as [Internal_Resistance(Ohm)], [82] as [dQ/dV(Ah/V)], [83] as [dV/dQ(V/Ah)]" +
@@ -54,11 +57,17 @@ class ArbinDatabase( object ):
         return pd.read_sql( query, self.conn_data )
         
         
-    def  testIVChannelList( self, testID ):
+    def testIVChannelList( self, testID ):
         query = ("SELECT * from TestIVChList_Table WHERE [Test_ID] = " + str(testID))
         
         return pd.read_sql( query, self.conn_master )
       
+      
+    def statisticData( self, testID ):
+        query = ("SELECT * from StatisticData_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY date_time")
+        
+        return pd.read_sql( query, self.conn_data )
+        
         
     def IVExtendedQuery(self, DBList, TestID, Channel,startDateTime, endDateTime, firstPoint, lastPoint, StartTime, EndTime, firstCycle, LastCycle):
         query = ""

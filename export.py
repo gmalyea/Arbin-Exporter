@@ -13,6 +13,13 @@ from ArbinExport import ArbinExport
 #
 #
 # ==============================================================================
+# Check for Max datapoints - do this on the fly during export?
+
+
+
+#Power might be calculated
+#Test Name: File Name
+# Convert Times
 
 
 SERVER = 'localhost'
@@ -20,18 +27,10 @@ USERNAME = 'sa'
 PASSWORD = 'Garret2020'
 
 
-#Select Query
-#tsql = "SELECT Test_ID, Channel_ID, Date_Time, Data_Point, Test_Time FROM IV_Basic_Table;"
-#with cursor.execute(tsql):
-#    row = cursor.fetchone()
-#    while row:
-#        print (str(row[0]) + " | " + str(row[1]) + " | " + str(row[2]) + " | " + str(row[3]) + " | " + str(row[4]))
-#        row = cursor.fetchone()
-
 
 arbinDatabase = ArbinDatabase( SERVER, USERNAME, PASSWORD )
 
-tests = arbinDatabase.allTests()
+tests = arbinDatabase.testList()
 
 print( tests )
 print( tests.iloc[0,0] )
@@ -39,9 +38,9 @@ print( tests.iloc[0,0] )
 arbinTest = ArbinTestItem( tests.iloc[0,0], arbinDatabase )
 
 arbinExport = ArbinExport( arbinTest )
-#arbinExport.exportGlobalInfo()
+#arbinExport.exportGlobalInfoSheet()
 #arbinExport.exportChannelData()
-#arbinExport.saveWorkbook( "Output/" )
+arbinExport.saveWorkbook( "Output/" )
 
 #data = arbinDatabase.basicData( tests.iloc[0,0] )
 
