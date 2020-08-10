@@ -75,18 +75,19 @@ class ArbinTestItem(object):
     def rawData( self ):
         data_basic_df = self.arbin_database.dataIVBasic( self.testID )
         data_extended_df = self.arbin_database.dataIVExtended( self.testID )
-        
         data_auxiliary_df = self.arbin_database.data_auxiliary_table( self.testID )
         
-        
+        #print( data_basic_df['Date_Time'] )
+        #print( data_auxiliary_df['Date_Time'] )
         
         mergedBasicExtended_df = pd.merge(data_basic_df, data_extended_df, on='Date_Time', how='outer')
         
-        mergedAux_df = pd.merge( mergedBasicExtended_df, data_auxiliary_df, on='Date_Time', how='outer')
+        #mergedAux_df = pd.merge( mergedBasicExtended_df, data_auxiliary_df, on='Date_Time', how='outer')
+        mergedAux_df = pd.concat( [mergedBasicExtended_df, data_auxiliary_df], axis=1 )
         
         
         rows_list = []
-        for index, row in mergedBasicExtended_df.iterrows():
+        for index, row in mergedAux_df.iterrows():
         
             dict_values = {         'Data_Point': row['Data_Point'],
                                      'Date_Time': row['Date_Time'],
@@ -105,23 +106,26 @@ class ArbinTestItem(object):
                                     'dV/dt(V/s)': row['dV/dt'],
                       'Internal_Resistance(Ohm)': row['Internal_Resistance'],
                                    'dQ/dV(Ah/V)': row['dQ/dV'],
-                                   'dV/dQ(V/Ah)': row['dV/dQ'],
-                              'Aux_Voltage_3(V)': '',
-                                'Aux_dV/dt_3(V)': '',
-                          'Aux_Temperature_3(C)': '',
-                                'Aux_dT/dt_3(C)': ''}
+                                   'dV/dQ(V/Ah)': row['dV/dQ'] }
+                      #        'Aux_Voltage_3(V)': '',
+                      #          'Aux_dV/dt_3(V)': '',
+                      #    'Aux_Temperature_3(C)': '',
+                      #          'Aux_dT/dt_3(C)': ''}
             
             
-            aux_values = {}
-            listofvalues = list(data_auxiliary_df.columns)
-            for column in listofvalues:
-                aux_values[column] = ""
+            #aux_values = {}
+            #for column in list(data_auxiliary_df.columns):
+            #    aux_values[column] = row[column]
+            
+            for column in list(data_auxiliary_df.columns):
+                dict_values[column] = row[column]
             
             
-            
-            #rows_list.append( dict_values )
-            rows_list.append( aux_values )
+            rows_list.append( dict_values )
+            #rows_list.append( aux_values )
 
+            print( rows_list )
+            print( "======================================================")
 
         return pd.DataFrame( rows_list )
 

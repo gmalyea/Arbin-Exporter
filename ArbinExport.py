@@ -51,7 +51,14 @@ class ArbinExport( object ):
              
 
     def exportChannelSheet( self, worksheet ):
-        for r in openpyxl.utils.dataframe.dataframe_to_rows(self.arbinTestItem.dbRawData_df, index=False, header=True):
+        #cdf = self.convert_date_time(self.arbinTestItem.dbRawData_df)
+    
+        df = self.arbinTestItem.dbRawData_df
+    
+        #df['Date_Time'] = df['Date_Time'].apply(lambda x: x * 100)
+        #df['Date_Time'] = "x"#str(pd.to_datetime(df['Date_Time'], unit='ns'))
+    
+        for r in openpyxl.utils.dataframe.dataframe_to_rows(df, index=False, header=True):
             worksheet.append(r)
     
         # Blue header background
@@ -91,7 +98,11 @@ class ArbinExport( object ):
         for col, value in dims.items():
             worksheet.column_dimensions[col].width = value
         
-        
+    def convert_date_time( self, df ):
+        df['Date_Time'] = df['Date_Time'].apply(lambda x: x * 100)
+        df['Date_Time'] = str(pd.to_datetime(df['Date_Time'], unit='ns'))
+        return df
+    
     
     
     

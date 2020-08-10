@@ -80,6 +80,7 @@ class ArbinDatabase( object ):
         end_date_time = df.at[df.index[-1], "Date_Time"]
 
         df = pd.DataFrame()
+        special = "[Date_Time], "
         
         for pair in auxiliary_type_channel_pair:
             aux_type = pair[0]
@@ -88,12 +89,38 @@ class ArbinDatabase( object ):
             aux_type_expanded = self.getAuxDataType(aux_type)
             aux_name = self.getAuxColumnName(aux_type_expanded, aux_channel)
             
+            #query = ("SELECT " + special + "[" + str(aux_type_expanded[0]) + "] as [" + str(aux_name[0]) + "], [" + str(aux_type_expanded[1]) + "] as [" + str(aux_name[1]) + "] "
+            #                  "FROM (SELECT * FROM Auxiliary_Table WHERE [AuxCh_Type] = " + str(aux_type_expanded[0]) + " AND [AuxCh_ID] = " + str(aux_channel) + " AND [Date_Time] > " + str(start_date_time) + " AND [Date_Time] < " + str(end_date_time) + ") AS tbl "
+            #                  "PIVOT (SUM(Data_Value) FOR Data_Type IN ([" + str(aux_type_expanded[0]) + "], [" + str(aux_type_expanded[1]) + "])) AS pvt ORDER BY [Date_Time]")
+            
             query = ("SELECT [Date_Time] as [Date_Time_Aux], [" + str(aux_type_expanded[0]) + "] as [" + str(aux_name[0]) + "], [" + str(aux_type_expanded[1]) + "] as [" + str(aux_name[1]) + "] "
                               "FROM (SELECT * FROM Auxiliary_Table WHERE [AuxCh_Type] = " + str(aux_type_expanded[0]) + " AND [AuxCh_ID] = " + str(aux_channel) + " AND [Date_Time] > " + str(start_date_time) + " AND [Date_Time] < " + str(end_date_time) + ") AS tbl "
                               "PIVOT (SUM(Data_Value) FOR Data_Type IN ([" + str(aux_type_expanded[0]) + "], [" + str(aux_type_expanded[1]) + "])) AS pvt ORDER BY [Date_Time_Aux]")
             
+            
+            special = ""
             dfq = pd.read_sql( query, self.conn_data )
+            
+            
             df = pd.concat([df, dfq], axis=1)
+            df = df.drop(columns=['Date_Time_Aux'])
+            #tbl.dropna(subset=['Data_Point'], inplace=True)
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            # This works
+            #df = pd.concat([df, dfq], axis = 1).T.drop_duplicates().T
+            
+
+        # This works too ... or should I just change the query to not get the date_time every time?
+        #df = df.loc[:,~df.columns.duplicated()]
         
         return df
     
