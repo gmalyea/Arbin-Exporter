@@ -32,19 +32,11 @@ arbinDatabase = ArbinDatabase( SERVER, USERNAME, PASSWORD )
 
 tests = arbinDatabase.testList()
 
-print( tests )
-print( tests.iloc[0,0] )
-
-arbinTest = ArbinTestItem( tests.iloc[0,0], arbinDatabase )
+arbinTest = ArbinTestItem( 40, arbinDatabase )
 
 arbinExport = ArbinExport( arbinTest )
-#arbinExport.exportGlobalInfoSheet()
-#arbinExport.exportChannelData()
+
 arbinExport.saveWorkbook( "Output/" )
-
-#data = arbinDatabase.basicData( tests.iloc[0,0] )
-
-#print( data )
 
 
 print( "END" )

@@ -10,14 +10,13 @@ from ArbinTestItem import ArbinTestItem
 
 
 class ArbinExport( object ):
-
     def __init__( self, arbinTestItem ):
         
         self.arbinTestItem = arbinTestItem
         
         currentDate = str( datetime.datetime.now() )
         currentDate = currentDate.split(" ")[0]
-        self.fileName = arbinTestItem.testName + "_" + currentDate + ".xlsx"
+        self.fileName = arbinTestItem.test_name + "_" + currentDate + ".xlsx"
         
         self.wb = openpyxl.Workbook()
         self.ws1 = self.wb.active
@@ -27,7 +26,6 @@ class ArbinExport( object ):
 
 
     def saveWorkbook( self, path ):
-        
         self.exportGlobalInfoSheet( self.ws1 )
         self.exportChannelSheet( self.ws2 )
         self.exportStatisticsSheet( self.ws3 )
@@ -38,7 +36,6 @@ class ArbinExport( object ):
         
 
     def exportGlobalInfoSheet( self, worksheet ):
-
         worksheet.append(['','','','TEST REPORT'])
         worksheet.append(['','','Test Name'])
         worksheet.append(['','','Export Time'])
@@ -54,7 +51,6 @@ class ArbinExport( object ):
              
 
     def exportChannelSheet( self, worksheet ):
-        
         for r in openpyxl.utils.dataframe.dataframe_to_rows(self.arbinTestItem.dbRawData_df, index=False, header=True):
             worksheet.append(r)
     
@@ -66,7 +62,6 @@ class ArbinExport( object ):
     
     
     def exportStatisticsSheet( self, worksheet ):
-        
         for r in openpyxl.utils.dataframe.dataframe_to_rows(self.arbinTestItem.dbCycleStatistics_df, index=False, header=True):
             worksheet.append(r)
     
@@ -82,14 +77,12 @@ class ArbinExport( object ):
     # Utilities
     # --------------------------------------------------------------------------------------
     def backgroundColor( self, worksheet, row, color ):
-    
         backgroundFill = openpyxl.styles.fills.PatternFill(start_color=color, end_color=color, fill_type='solid')
         for cell in list(worksheet.rows)[row]:
             cell.fill = backgroundFill
     
     
     def resizeCells( self, worksheet, rows_to_check ):
-    
         dims = {}
         for row in list (worksheet.rows)[rows_to_check]:
             for cell in row:
