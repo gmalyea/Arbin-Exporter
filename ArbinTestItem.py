@@ -6,40 +6,27 @@ from ArbinDatabase import ArbinDatabase
 
 class ArbinTestItem(object):
     
-    def __init__( self, testID, arbinDatabase ):
+    def __init__( self, testID, arbin_database ):
         self.testID = testID
-        self.arbin_database = arbinDatabase
+        self.arbin_database = arbin_database
         
-        self.test_name = self.testItemName()
+        self.test_name = self.test_name()
         self.has_auxiliary = self.has_auxiliary()
 
-        self.dbGlobalInfo_df = self.globalInfo()
-        self.dbRawData_df = self.rawData()
-        self.dbCycleStatistics_df = self.cycleStatistics()
-
-        ### Need to combine auxiliary like extended
-        self.auxiliary_df = self.auxiliary_data()
-
-        print( self.auxiliary_df )
-
-        AuxChannels = []  #2D List of all Auxillary Channels, first index is the parent channel the aux is mapped to, second index is the aux channel
-        AuxTypes = []
+        self.db_global_info_df = self.globalInfo()
+        self.db_raw_data_df = self.rawData()
+        self.db_cycle_statistics_df = self.cycleStatistics()
 
 
     def has_auxiliary( self ):
         testIVChannelList_df = self.arbin_database.testIVChannelList( self.testID )
         
-        if testIVChannelList_df.at[0, 'Log_Aux_Data_Flag'] == 1:
+        if( testIVChannelList_df.at[0, 'Log_Aux_Data_Flag'] == 1 ):
             return True
-        
         return False
-    
-    
-    def auxiliary_data( self ):
-        return self.arbin_database.data_auxiliary_table( self.testID )
 
             
-    def testItemName( self ):
+    def test_name( self ):
         testList_df = self.arbin_database.testListFor( self.testID )
         return testList_df.at[0,'Test_Name']
     
@@ -75,19 +62,13 @@ class ArbinTestItem(object):
     def rawData( self ):
         data_basic_df = self.arbin_database.dataIVBasic( self.testID )
         data_extended_df = self.arbin_database.dataIVExtended( self.testID )
+        merged_df = pd.merge(data_basic_df, data_extended_df, on='Date_Time', how='outer')
+        
         data_auxiliary_df = self.arbin_database.data_auxiliary_table( self.testID )
-        
-        #print( data_basic_df['Date_Time'] )
-        #print( data_auxiliary_df['Date_Time'] )
-        
-        mergedBasicExtended_df = pd.merge(data_basic_df, data_extended_df, on='Date_Time', how='outer')
-        
-        #mergedAux_df = pd.merge( mergedBasicExtended_df, data_auxiliary_df, on='Date_Time', how='outer')
-        mergedAux_df = pd.concat( [mergedBasicExtended_df, data_auxiliary_df], axis=1 )
-        
+        merged_df = pd.concat( [merged_df, data_auxiliary_df], axis=1 )
         
         rows_list = []
-        for index, row in mergedAux_df.iterrows():
+        for index, row in merged_df.iterrows():
         
             dict_values = {         'Data_Point': row['Data_Point'],
                                      'Date_Time': row['Date_Time'],
@@ -107,25 +88,11 @@ class ArbinTestItem(object):
                       'Internal_Resistance(Ohm)': row['Internal_Resistance'],
                                    'dQ/dV(Ah/V)': row['dQ/dV'],
                                    'dV/dQ(V/Ah)': row['dV/dQ'] }
-                      #        'Aux_Voltage_3(V)': '',
-                      #          'Aux_dV/dt_3(V)': '',
-                      #    'Aux_Temperature_3(C)': '',
-                      #          'Aux_dT/dt_3(C)': ''}
-            
-            
-            #aux_values = {}
-            #for column in list(data_auxiliary_df.columns):
-            #    aux_values[column] = row[column]
             
             for column in list(data_auxiliary_df.columns):
                 dict_values[column] = row[column]
             
-            
             rows_list.append( dict_values )
-            #rows_list.append( aux_values )
-
-            print( rows_list )
-            print( "======================================================")
 
         return pd.DataFrame( rows_list )
 

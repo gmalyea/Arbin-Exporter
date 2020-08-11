@@ -40,7 +40,7 @@ class ArbinExport( object ):
         worksheet.append(['','','Test Name'])
         worksheet.append(['','','Export Time'])
         
-        for r in openpyxl.utils.dataframe.dataframe_to_rows(self.arbinTestItem.dbGlobalInfo_df, index=False, header=True):
+        for r in openpyxl.utils.dataframe.dataframe_to_rows(self.arbinTestItem.db_global_info_df, index=False, header=True):
             worksheet.append(r)
              
         # Green header background        
@@ -53,11 +53,12 @@ class ArbinExport( object ):
     def exportChannelSheet( self, worksheet ):
         #cdf = self.convert_date_time(self.arbinTestItem.dbRawData_df)
     
-        df = self.arbinTestItem.dbRawData_df
+        df = self.arbinTestItem.db_raw_data_df
     
-        #df['Date_Time'] = df['Date_Time'].apply(lambda x: x * 100)
-        #df['Date_Time'] = "x"#str(pd.to_datetime(df['Date_Time'], unit='ns'))
-    
+        df['Date_Time'] = df['Date_Time'].apply(lambda x: x * 100)
+        df['Date_Time'] = pd.to_datetime(df['Date_Time'], unit='ns')
+        
+
         for r in openpyxl.utils.dataframe.dataframe_to_rows(df, index=False, header=True):
             worksheet.append(r)
     
@@ -69,7 +70,7 @@ class ArbinExport( object ):
     
     
     def exportStatisticsSheet( self, worksheet ):
-        for r in openpyxl.utils.dataframe.dataframe_to_rows(self.arbinTestItem.dbCycleStatistics_df, index=False, header=True):
+        for r in openpyxl.utils.dataframe.dataframe_to_rows(self.arbinTestItem.db_cycle_statistics_df, index=False, header=True):
             worksheet.append(r)
     
         # Blue header background
