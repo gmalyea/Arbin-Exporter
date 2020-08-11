@@ -8,15 +8,24 @@ import dateutil
 import os
 from ArbinTestItem import ArbinTestItem
 
+# =============================================================================
+# ArbinExport
+# -----------------------------------------------------------------------------
+# 
+# 
+# 
+# 
+#
+# =============================================================================
 
 class ArbinExport( object ):
+
     def __init__( self, arbinTestItem ):
-        
         self.arbinTestItem = arbinTestItem
         
-        currentDate = str( datetime.datetime.now() )
-        currentDate = currentDate.split(" ")[0]
-        self.fileName = arbinTestItem.test_name + "_" + currentDate + ".xlsx"
+        current_date = str( datetime.datetime.now() )
+        current_date = current_date.split(" ")[0]
+        self.file_name = arbinTestItem.test_name + "_" + current_date + ".xlsx"
         
         self.wb = openpyxl.Workbook()
         self.ws1 = self.wb.active
@@ -25,228 +34,82 @@ class ArbinExport( object ):
         self.ws3 = self.wb.create_sheet("Statistics")
 
 
-    def saveWorkbook( self, path ):
-        self.exportGlobalInfoSheet( self.ws1 )
-        self.exportChannelSheet( self.ws2 )
-        self.exportStatisticsSheet( self.ws3 )
+    def save_workbook( self, path ):
+        self.export_global_info_sheet( self.ws1 )
+        self.export_channel_sheet( self.ws2 )
+        self.export_statistics_sheet( self.ws3 )
         
         if( not os.path.isdir(path) ): os.makedirs(path)
-        self.wb.save( path + self.fileName )
+        self.wb.save( path + self.file_name )
     
-        
 
-    def exportGlobalInfoSheet( self, worksheet ):
+    def export_global_info_sheet( self, worksheet ):
         worksheet.append(['','','','TEST REPORT'])
         worksheet.append(['','','Test Name'])
         worksheet.append(['','','Export Time'])
         
-        for r in openpyxl.utils.dataframe.dataframe_to_rows(self.arbinTestItem.db_global_info_df, index=False, header=True):
-            worksheet.append(r)
+        df = self.arbinTestItem.global_info_df        
+        df = self.convert_date_time( df, 'Start DateTime', 's', 1 )
+        
+        for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
+            worksheet.append( row )
              
         # Green header background        
-        self.backgroundColor( worksheet, 3, 'CEFFCE' )
+        self.background_color( worksheet, 3, 'CEFFCE' )
         
         # Resize cells to fit  
-        self.resizeCells( worksheet, slice(3,5) )
+        self.resize_cells( worksheet, slice(3,5) )
              
 
-    def exportChannelSheet( self, worksheet ):
-        #cdf = self.convert_date_time(self.arbinTestItem.dbRawData_df)
-    
-        df = self.arbinTestItem.db_raw_data_df
-    
-        df['Date_Time'] = df['Date_Time'].apply(lambda x: x * 100)
-        df['Date_Time'] = pd.to_datetime(df['Date_Time'], unit='ns')
-        
+    def export_channel_sheet( self, worksheet ):
+        df = self.arbinTestItem.raw_data_df        
+        df = self.convert_date_time( df, 'Date_Time', 'ns', 100 )
 
-        for r in openpyxl.utils.dataframe.dataframe_to_rows(df, index=False, header=True):
-            worksheet.append(r)
+        for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
+            worksheet.append( row )
     
         # Blue header background
-        self.backgroundColor( worksheet, 0, 'CEFFFF' )
+        self.background_color( worksheet, 0, 'CEFFFF' )
     
         # Resize cells to fit
-        self.resizeCells( worksheet, slice(0,2) )
+        self.resize_cells( worksheet, slice(0,2) )
     
     
-    def exportStatisticsSheet( self, worksheet ):
-        for r in openpyxl.utils.dataframe.dataframe_to_rows(self.arbinTestItem.db_cycle_statistics_df, index=False, header=True):
-            worksheet.append(r)
+    def export_statistics_sheet( self, worksheet ):
+        df = self.arbinTestItem.cycle_statistics_df  
+        df = self.convert_date_time( df, 'Date_Time', 'ns', 100 )
+        
+        for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
+            worksheet.append( row )
     
         # Blue header background
-        self.backgroundColor( worksheet, 0, 'CEFFFF' )
+        self.background_color( worksheet, 0, 'CEFFFF' )
     
         # Resize cells to fit
-        self.resizeCells( worksheet, slice(0,2) )    
-    
+        self.resize_cells( worksheet, slice(0,2) )    
     
     
     # --------------------------------------------------------------------------------------
     # Utilities
     # --------------------------------------------------------------------------------------
-    def backgroundColor( self, worksheet, row, color ):
-        backgroundFill = openpyxl.styles.fills.PatternFill(start_color=color, end_color=color, fill_type='solid')
+    def background_color( self, worksheet, row, color ):
+        backgroundFill = openpyxl.styles.fills.PatternFill( start_color=color, end_color=color, fill_type='solid' )
         for cell in list(worksheet.rows)[row]:
             cell.fill = backgroundFill
     
     
-    def resizeCells( self, worksheet, rows_to_check ):
+    def resize_cells( self, worksheet, rows_to_check ):
         dims = {}
-        for row in list (worksheet.rows)[rows_to_check]:
+        for row in list(worksheet.rows)[rows_to_check]:
             for cell in row:
                 if cell.value:
-                    dims[cell.column_letter] = max((dims.get(cell.column_letter, 0), len(str(cell.value)))) 
+                    dims[cell.column_letter] = max( (dims.get(cell.column_letter, 0), len(str(cell.value))) ) 
         for col, value in dims.items():
             worksheet.column_dimensions[col].width = value
         
-    def convert_date_time( self, df ):
-        df['Date_Time'] = df['Date_Time'].apply(lambda x: x * 100)
-        df['Date_Time'] = str(pd.to_datetime(df['Date_Time'], unit='ns'))
+    def convert_date_time( self, df, column_name, unit, multiplier ):
+        df[column_name] = df[column_name].apply( lambda x: x * multiplier )
+        df[column_name] = pd.to_datetime(df[column_name], unit=unit, errors = 'coerce' )
         return df
     
     
-    
-    
-#    def exportExcel(self, df):
-#
-#        test = self.testItem
-#
-#        FileType = ""
-#        if(self.exportType == 0):
-#            FileType = ".xlsx"
-#        elif(self.exportType == 1):
-#            FileType = ".csv"
-#
-#        currentDate = str(datetime.datetime.now())
-#        currentDate = currentDate.split(" ")[0]
-#        path += test.testName + "_" + currentDate
-#
-#        if(not os.path.isdir(path)):
-#            os.makedirs(path)
-#
-#        
-#        # LIMIT TO 1,000,000 data points per file?
-#
-#        #tbl = pd.merge(IV_Basic_tbl, IV_Extended_tbl, on='Date_Time', how='outer')
-#
-#
-#
-#                #Convert from UTC to date
-#                tbl['Date_Time'] = tbl['Date_Time'].apply(lambda x: x * 100)
-#                tbl['Date_Time'] = str(pd.to_datetime(tbl['Date_Time'], unit='ns'))
-#
-#                #Write to CSV
-#                fileName = path + "\\" + test.testName + "_Channel_" + str(test.Channels[i]) + "_IV&Aux__Wb_" + str(wbIndex) + FileType
-#
-#                if self.timeBounds:
-#                    fileName = path + "\\" + test.testName + "_Channel_" + str(test.Channels[i]) + "_TestTime_" + test.StartTimes[i] + "-" + test.EndTimes[i] + "_IV&Aux__Wb_" + str(wbIndex) + FileType
-#
-#                if self.cycleBounds:
-#                    fileName = path + "\\" + test.testName + "_Channel_" + str(test.Channels[i]) + "_Cycle_" + test.StartCycles[i] + "-" + test.EndCycles[i] + "_IV&Aux__Wb_" + str(wbIndex) + FileType
-#
-#                if self.exportType == 1:
-#                    tbl.to_csv(fileName, index=False)
-#                elif self.exportType == 0:
-#                    tbl.to_excel(fileName, index=False)
-#
-#                wbIndex += 1
-
-
-
-
-
- 
-
-    def ExportStatsByCycle(self, path):
-        test = self.testItem
-
-        currentDate = str(datetime.datetime.now())
-        currentDate = currentDate.split(" ")[0]
-        path += test.testName + "_" + currentDate
-
-        if(not os.path.isdir(path)):
-            os.makedirs(path)
-
-        for i in range(len(test.Channels)):
-            query = ""
-            for j in range(len(test.ResultDB)):    
-                query += (("SELECT [Date_Time], [Test_Time] as [Test_Time(s)], [Step_Time] as [Step_Time(s)]" +
-                           " ,[Cycle_ID] as [Cycle_Index]" 
-                           " ,[Step_ID] as [Step_Index]"
-                           " ,[Voltage] as [Voltage(V)]"
-                           " ,[Current] as [Current(A)]"
-                           " ,[Charge_Capacity] as [Charge_Capacity(Ah)]"
-                           " ,[Discharge_Capacity] as [Discharge_Capacity(Ah)]"
-                           " ,[Charge_Energy] as [Charge_Energy(Wh)]"
-                           " ,[Discharge_Energy] as [Discharge_Energy(Wh)]"
-                           " ,[Charge_Time] as [Charge_Time(s)]"
-                           " ,[Discharge_Time] as [Discharge_Time(s)]"
-                           " ,[V_Max_On_Cycle] as [V_Max_On_Cycle (V)]" 
-                           " ,[Discharge_Capacity] * 100 /NULLIF([Charge_Capacity],0) as [Coulombic Efficiency %%]"
-                           "FROM %s.dbo.StatisticData_Table WHERE [Test_ID] = %s AND [Channel_ID] = %d"
-                           "AND [Step_ID] = (SELECT Max([Step_ID]) FROM %s.dbo.StatisticData_Table WHERE [Test_ID] = %s AND [Channel_ID] = %d)"
-                           )
-
-                        % (test.ResultDB[j], test.testID, test.Channels[i],test.ResultDB[j], test.testID, test.Channels[i]))
-
-                if j != len(test.ResultDB)- 1:
-                    query += " UNION ALL ";
-
-
-            query += " ORDER BY date_time"
-
-            #Excecute the Query 
-            tbl = pd.read_sql(query, self.conn)
-
-            #Write to CSV
-            if self.exportType == 1:
-                tbl.to_csv(path + "\\" + test.testName + "_Channel_" + str(test.Channels[i]) + "_StatisticsByCycle.csv", index=False)
-            elif self.exportType == 0:
-                tbl.to_excel(path + "\\" + test.testName + "_Channel_" + str(test.Channels[i]) + "_StatisticsByCycle.xlsx", index=False)
-
-
-
-
-    def getAuxDataType(self,dataCode):
-        if dataCode == "0": #Voltage and dV/dt
-            return [0,30]
-        elif dataCode == "1": #Temperature and dT/dt
-            return [1,31]
-        else:
-            val = int(dataCode)
-            return [val]
-
-
-    def getAuxColumnName(self, dtype, chan):
-        nameList = []
-        for type in dtype:
-            if type == 0:
-                nameList.append("Aux_Voltage_" + chan + "(V)")
-            if type == 1:
-                nameList.append("Aux_Temperature_" + chan + "(C)")
-            if type == 2:
-                nameList.append("Aux_Pressure_" + chan + "(psi)")
-            if type == 3:
-                nameList.append("Aux_pH_" + chan + "(V)")
-            if type == 4:
-                nameList.append("Aux_Flow_Rate_" + chan + "(C)")
-            if type == 5:
-                nameList.append("Aux_Density_" + chan + "(psi)")
-            if type == 6:
-                nameList.append("Aux_Digital_Input_" + chan + "(V/s)")
-            if type == 7:
-                nameList.append("Aux_Digital_Output_" + chan + "(C/s)")
-            if type == 8:
-                nameList.append("Aux_EC_" + chan + "(C)")
-            if type == 9:
-                nameList.append("Aux_Safety_" + chan + "(psi)")
-            if type == 10:
-                nameList.append("Aux_Humidity_" + chan + "(V/s)")
-            if type == 11:
-                nameList.append("Aux_Analog_Output_" + chan + "(C/s)")
-            if type == 30:
-                nameList.append("Aux_dV/dt_" + chan + "(V/s)")
-            if type == 31:
-                nameList.append("Aux_dT/dt_" + chan + "(C/s)")
-
-        return nameList
