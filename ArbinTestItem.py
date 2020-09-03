@@ -1,6 +1,4 @@
 import sys
-import datetime
-import dateutil
 import pandas as pd
 from ArbinDatabase import ArbinDatabase
 
@@ -27,6 +25,7 @@ class ArbinTestItem( object ):
         self.arbin_database = arbin_database
         
         self.test_name = self.test_name()
+        self.device_id = self.device_id()
         self.has_auxiliary = self.has_auxiliary()
 
         self.global_info_df = self.get_global_info()
@@ -51,6 +50,9 @@ class ArbinTestItem( object ):
         test_list_df = self.arbin_database.test_list_for( self.testID )
         return test_list_df.at[0,'Test_Name']
     
+    def device_id( self ):
+        test_list_df = self.arbin_database.test_list_for( self.testID )
+        return test_list_df.at[0,'Device_ID']
     
     def raw_data_count( self ):
         return self.raw_data_df['Data_Point'].count()

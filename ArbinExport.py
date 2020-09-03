@@ -1,5 +1,6 @@
 import os
 import math
+import datetime
 import pyodbc
 import pandas as pd
 import openpyxl
@@ -52,9 +53,13 @@ class ArbinExport( object ):
     
 
     def export_global_info_sheet( self, worksheet ):
+        test_name = self.arbinTestItem.test_name
+        device_id = self.arbinTestItem.device_id
+        current_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
         worksheet.append(['','','','TEST REPORT'])
-        worksheet.append(['','','Test Name'])
-        worksheet.append(['','','Export Time'])
+        worksheet.append(['','','Test Name',test_name,'Serial Number','Processed by: export.py'])
+        worksheet.append(['','','Export Time',current_date,device_id])
         
         df = self.arbinTestItem.global_info_df
         
@@ -65,7 +70,7 @@ class ArbinExport( object ):
         ArbinWorkbook.background_color( worksheet, 3, 'CEFFCE' )
         
         # Resize cells to fit  
-        ArbinWorkbook.resize_cells( worksheet, slice(3,5) )
+        ArbinWorkbook.resize_cells( worksheet, slice(1,5) )
              
 
     def export_channel_sheet( self, worksheet, wb_num ):
