@@ -1,0 +1,51 @@
+import openpyxl
+import openpyxl.utils.dataframe
+import openpyxl.styles.colors
+import os
+
+# =============================================================================
+# ArbinWorkbook
+# -----------------------------------------------------------------------------
+# 
+# 
+# 
+# 
+#
+# =============================================================================
+
+class ArbinWorkbook( object ):
+
+    def __init__( self, file_name ):
+        self.file_name = file_name + ".xlsx"
+        
+        self.wb = openpyxl.Workbook()
+        self.ws1 = self.wb.active
+        self.ws1.title = "Global Info"
+        self.ws2 = self.wb.create_sheet("Channel")
+        self.ws3 = self.wb.create_sheet("Statistics")
+
+
+    def save_workbook( self, path ):
+        if( not os.path.isdir(path) ): os.makedirs(path)
+        self.wb.save( path + self.file_name )
+    
+  
+    
+    # --------------------------------------------------------------------------------------
+    # Utilities
+    # --------------------------------------------------------------------------------------
+    def background_color( self, worksheet, row, color ):
+        backgroundFill = openpyxl.styles.fills.PatternFill( start_color=color, end_color=color, fill_type='solid' )
+        for cell in list(worksheet.rows)[row]:
+            cell.fill = backgroundFill
+    
+    
+    def resize_cells( self, worksheet, rows_to_check ):
+        dims = {}
+        for row in list(worksheet.rows)[rows_to_check]:
+            for cell in row:
+                if cell.value:
+                    dims[cell.column_letter] = max( (dims.get(cell.column_letter, 0), len(str(cell.value))) ) 
+        for col, value in dims.items():
+            worksheet.column_dimensions[col].width = value
+        

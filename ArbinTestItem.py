@@ -38,6 +38,10 @@ class ArbinTestItem( object ):
         test_list_df = self.arbin_database.test_list_for( self.testID )
         return test_list_df.at[0,'Test_Name']
     
+    
+    def raw_data_count( self ):
+        return self.raw_data_df['Data_Point'].count()
+        
 
     def get_global_info( self ):
         test_channel_list_df = self.arbin_database.test_channel_list( self.testID )

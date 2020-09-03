@@ -26,7 +26,7 @@ from ArbinExport import ArbinExport
 # - Power might be calculated
 # - Test Name: File Name
 # - Convert Times - order of date
-#
+# - Need to set properties or just use methods?
 # =============================================================================
 
 
