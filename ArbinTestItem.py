@@ -1,4 +1,6 @@
 import sys
+import datetime
+import dateutil
 import pandas as pd
 from ArbinDatabase import ArbinDatabase
 
@@ -6,11 +8,17 @@ from ArbinDatabase import ArbinDatabase
 # ArbinTestItem
 # -----------------------------------------------------------------------------
 # 
-# 
-# 
-# 
+# Notes:
+#   DateTime columns are processed to change timezone from UTC.  Because
+#       DateTime columns are not the DataFrame index, they are also converted
+#       to strings (Pandas limitation).
 #
 # =============================================================================
+
+# Constants
+# -----------------------------------------------------------------------------
+TIMEZONE = "America/New_York"
+
 
 class ArbinTestItem( object ):
     
@@ -24,6 +32,11 @@ class ArbinTestItem( object ):
         self.global_info_df = self.get_global_info()
         self.raw_data_df = self.get_raw_data()
         self.cycle_statistics_df = self.get_cycle_statistics()
+
+        # Change Timezone
+        self.global_info_df = self.convert_date_time( self.global_info_df, 'Start DateTime', 's', 1 )
+        self.raw_data_df = self.convert_date_time( self.raw_data_df, 'Date_Time', 'ns', 100 )
+        self.cycle_statistics_df = self.convert_date_time( self.cycle_statistics_df, 'Date_Time', 'ns', 100 )
 
 
     def has_auxiliary( self ):
@@ -139,3 +152,15 @@ class ArbinTestItem( object ):
         return pd.DataFrame( rows_list )
         
 
+
+    # --------------------------------------------------------------------------------------
+    # Utilities
+    # --------------------------------------------------------------------------------------
+    def convert_date_time( self, df, column_name, unit, multiplier ):
+        df[column_name] = df[column_name].apply( lambda x: x * multiplier )
+        df[column_name] = pd.to_datetime(df[column_name], unit=unit, errors = 'coerce' )
+        df[column_name] = pd.DatetimeIndex(df[column_name]).tz_localize('UTC').tz_convert(TIMEZONE).strftime('%Y-%m-%d %H:%M:%S.%f')
+        
+        return df
+    
+    
