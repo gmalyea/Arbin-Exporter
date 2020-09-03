@@ -64,7 +64,6 @@ class ArbinTestItem( object ):
         
         rows_list = []
         for index, row in test_channel_list_df.iterrows():
-        
             dict_values = {            'Channel': row['IV_Ch_ID'],
                                 'Start DateTime': row['First_Start_DateTime'],
                             'Schedule File Name': row['Schedule_File_Name'],
@@ -78,8 +77,8 @@ class ArbinTestItem( object ):
                                        'Item ID': row['Item_ID'],
                                        'Has Aux': row['Has_Aux'],
                                    'Has Special': row['Has_Special'],
-                             'Log Aux Data Flag': row['Log_Aux_Data_Flag'],
-                              'Log Special Flag': row['Log_Special_Data_Flag'] }
+                             'Log Aux Data Flag': bool(row['Log_Aux_Data_Flag']),
+                              'Log Special Flag': bool(row['Log_Special_Data_Flag']) }
             
             rows_list.append( dict_values )
             
@@ -96,7 +95,6 @@ class ArbinTestItem( object ):
         
         rows_list = []
         for index, row in merged_df.iterrows():
-        
             dict_values = {         'Data_Point': row['Data_Point'],
                                      'Date_Time': row['Date_Time'],
                                  'Test_Times(s)': row['Test_Time'],
@@ -105,7 +103,7 @@ class ArbinTestItem( object ):
                                     'Step_Index': row['Step_ID'],
                                     'Current(A)': row['Current'],
                                     'Voltage(V)': row['Voltage'],
-                                      'Power(W)': '',
+                                      'Power(W)': '',                               # Calculated Value
                            'Charge_Capacity(Ah)': row['Charge_Capacity'],
                         'Discharge_Capacity(Ah)': row['Discharge_Capacity'],
                              'Charge_Energy(Wh)': row['Charge_Energy'],
@@ -125,6 +123,8 @@ class ArbinTestItem( object ):
         df.dropna(subset=['Data_Point'], inplace=True)
         return df
         #return pd.DataFrame( rows_list )
+        
+        #  WHAT IS THIS ALL ABOUT above?????
 
 
     def get_cycle_statistics( self ):
@@ -132,7 +132,6 @@ class ArbinTestItem( object ):
         
         rows_list = []
         for index, row in statistic_data_df.iterrows():
-        
             dict_values = {          'Date_Time': row['Date_Time'],
                                  'Test_Times(s)': row['Test_Time'],
                                  'Step_Times(s)': row['Step_Time'],
@@ -147,7 +146,7 @@ class ArbinTestItem( object ):
                                 'Charge_Time(s)': row['Charge_Time'],
                              'Discharge_Time(s)': row['Discharge_Time'],
                             'V_Max_On_Cycle (V)': row['V_Max_On_Cycle'],
-                       'Coulombic Efficiency %%': ''}#row['Discharge_Capacity'] * 100 /NULLIF(row['Charge_Capacity'],0) }
+                       'Coulombic Efficiency %%': ''}   #row['Discharge_Capacity'] * 100 /NULLIF(row['Charge_Capacity'],0) }
 
             rows_list.append( dict_values )
 

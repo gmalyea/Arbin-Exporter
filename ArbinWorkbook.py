@@ -1,7 +1,5 @@
 import os
 import openpyxl
-import openpyxl.utils.dataframe
-import openpyxl.styles.colors
 
 # =============================================================================
 # ArbinWorkbook
@@ -39,8 +37,15 @@ class ArbinWorkbook( object ):
         backgroundFill = openpyxl.styles.fills.PatternFill( start_color=color, end_color=color, fill_type='solid' )
         for cell in list(worksheet.rows)[row]:
             cell.fill = backgroundFill
-    
-    
+            
+            
+    @staticmethod
+    def bottom_border( worksheet, row ):
+        border = openpyxl.styles.borders.Border(bottom=openpyxl.styles.borders.Side(style='thin'))       
+        for cell in list(worksheet.rows)[row]:
+            cell.border = border
+
+
     @staticmethod
     def resize_cells( worksheet, rows_to_check ):
         dims = {}

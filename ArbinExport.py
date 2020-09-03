@@ -5,7 +5,6 @@ import pyodbc
 import pandas as pd
 import openpyxl
 import openpyxl.utils.dataframe
-import openpyxl.styles.colors
 from ArbinTestItem import ArbinTestItem
 from ArbinWorkbook import ArbinWorkbook
 
@@ -69,6 +68,9 @@ class ArbinExport( object ):
         # Green header background        
         ArbinWorkbook.background_color( worksheet, 3, 'CEFFCE' )
         
+        # Bottom border       
+        ArbinWorkbook.bottom_border( worksheet, 3 )
+        
         # Resize cells to fit  
         ArbinWorkbook.resize_cells( worksheet, slice(1,5) )
              
@@ -84,6 +86,9 @@ class ArbinExport( object ):
     
         # Blue header background
         ArbinWorkbook.background_color( worksheet, 0, 'CEFFFF' )
+        
+        # Bottom border       
+        ArbinWorkbook.bottom_border( worksheet, 0 )
     
         # Resize cells to fit
         ArbinWorkbook.resize_cells( worksheet, slice(0,2) )
@@ -97,6 +102,9 @@ class ArbinExport( object ):
     
         # Blue header background
         ArbinWorkbook.background_color( worksheet, 0, 'CEFFFF' )
+    
+        # Bottom border       
+        ArbinWorkbook.bottom_border( worksheet, 0 )
     
         # Resize cells to fit
         ArbinWorkbook.resize_cells( worksheet, slice(0,2) )
