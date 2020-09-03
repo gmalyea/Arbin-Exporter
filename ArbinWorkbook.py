@@ -47,6 +47,13 @@ class ArbinWorkbook( object ):
 
 
     @staticmethod
+    def right_justify( worksheet, column_row ):
+        alignment = openpyxl.styles.Alignment(horizontal='right')
+        cell = worksheet[column_row]
+        cell.alignment = alignment
+
+
+    @staticmethod
     def resize_cells( worksheet, rows_to_check ):
         dims = {}
         for row in list(worksheet.rows)[rows_to_check]:

@@ -54,10 +54,10 @@ class ArbinExport( object ):
     def export_global_info_sheet( self, worksheet ):
         test_name = self.arbinTestItem.test_name
         device_id = self.arbinTestItem.device_id
-        current_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        current_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
             
-        worksheet.append(['','','','TEST REPORT'])
-        worksheet.append(['','','Test Name',test_name,'Serial Number','Processed by: export.py'])
+        worksheet.append(['','','','TEST REPORT','Processed by: export.py'])
+        worksheet.append(['','','Test Name',test_name,'Serial Number'])
         worksheet.append(['','','Export Time',current_date,device_id])
         
         df = self.arbinTestItem.global_info_df
@@ -70,6 +70,11 @@ class ArbinExport( object ):
         
         # Bottom border       
         ArbinWorkbook.bottom_border( worksheet, 3 )
+        
+        ArbinWorkbook.right_justify( worksheet, 'C2' )
+        ArbinWorkbook.right_justify( worksheet, 'C3' )
+        ArbinWorkbook.right_justify( worksheet, 'D2' )
+        ArbinWorkbook.right_justify( worksheet, 'D3' )
         
         # Resize cells to fit  
         ArbinWorkbook.resize_cells( worksheet, slice(1,5) )

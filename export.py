@@ -6,7 +6,7 @@ from ArbinTestItem import ArbinTestItem
 from ArbinExport import ArbinExport
 
 # =============================================================================
-# Export
+# Exporter
 # -----------------------------------------------------------------------------
 # Usage
 # -----------------------------------------------------------------------------
@@ -22,11 +22,17 @@ from ArbinExport import ArbinExport
 # - Data is only in one database?
 # - drop incomplete rows?
 # - single channel aux data? - Test #46
-# - Check for Max datapoints - do this on the fly during export?
-# - Power might be calculated
-# - Test Name: File Name
-# - Convert Times - order of date
 # - Need to set properties or just use methods?
+# - Clean up cell formatters
+# - Python standard file organization
+# - Statistics tab is "StatisticsByCycle"?
+# - Channel and Statistics no "A" column?
+# - Channel and Statistics DateTime doesn't scroll
+# - Statistics need Power after Voltage
+# - Statistics: Vmax, Coulombic, mAh/g, Aux
+#
+# MINREST-2:
+# - Channel Sheet Aux data
 # =============================================================================
 
 
