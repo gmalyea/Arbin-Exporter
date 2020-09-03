@@ -110,30 +110,7 @@ class ArbinExport( object ):
     def convert_date_time( self, df, column_name, unit, multiplier ):
         df[column_name] = df[column_name].apply( lambda x: x * multiplier )
         df[column_name] = pd.to_datetime(df[column_name], unit=unit, errors = 'coerce' )
-        
-        #df = df.set_index(pd.DatetimeIndex(df[column_name])).tz_localize('UTC').tz_convert('America/New_York')
-        
         df[column_name] = pd.DatetimeIndex(df[column_name]).tz_localize('UTC').tz_convert('America/New_York').strftime('%Y-%m-%d %H:%M:%S.%f')
-        
-        
-        
-        df_temp = df[[column_name]].copy()
-        df_temp[column_name] = pd.DatetimeIndex(df_temp[column_name]).tz_localize('UTC').tz_convert('America/New_York').strftime('%Y-%m-%d %H:%M:%S.%f')
-        
-        df[column_name] = df_temp[column_name]
-        
-        #print( df_temp )
-        print( df[column_name] )
-        
-        #df = df.set_index(column_name)
-        #blah = df[column_name]
-        
-        #df[column_name] = df[column_name].dt.tz_localize('UTC').dt.tz_convert('America/New_York')
-        #df[column_name] = pd.DatetimeIndex(df[column_name]).tz_localize('UTC').tz_convert('America/New_York')
-        
-        #df.Date.dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
-        
-        
         
         return df
     
