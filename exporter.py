@@ -30,15 +30,9 @@ from arbin.ArbinExport import ArbinExport
 # - Statistics need Power after Voltage
 # - Statistics: Vmax, Coulombic, mAh/g, Aux
 #
-# MINREST-2:
-# - Channel Sheet Aux data
-#
 #
 # QUESTIONS
-# - Statistics doesn't have every row. - only export last row per cycle index
-# - Statistics: mAh/g
-# - Aux: V C vs V/s C/s
-# - Statistics: Aux data same?
+# - Channel number in worksheet names?
 # =============================================================================
 
 

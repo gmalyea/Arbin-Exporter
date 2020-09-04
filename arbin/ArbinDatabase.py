@@ -118,32 +118,32 @@ class ArbinDatabase( object ):
         nameList = []
         for type in dtype:
             if type == 0:
-                nameList.append( "Aux_Voltage_" + str(channel) + "(V)" )
+                nameList.append( "Aux_Voltage_" + str(channel) + " (V)" )
             if type == 1: 
-                nameList.append( "Aux_Temperature_" + str(channel) + "(C)" )
+                nameList.append( "Aux_Temperature_" + str(channel) + " (C)" )
             if type == 2: 
-                nameList.append( "Aux_Pressure_" + str(channel) + "(psi)" )
+                nameList.append( "Aux_Pressure_" + str(channel) + " (psi)" )
             if type == 3: 
-                nameList.append( "Aux_pH_" + str(channel) + "(V)" )
+                nameList.append( "Aux_pH_" + str(channel) + " (V)" )
             if type == 4: 
-                nameList.append( "Aux_Flow_Rate_" + str(channel) + "(C)" )
+                nameList.append( "Aux_Flow_Rate_" + str(channel) + " (C)" )
             if type == 5: 
-                nameList.append( "Aux_Density_" + str(channel) + "(psi)" )
+                nameList.append( "Aux_Density_" + str(channel) + " (psi)" )
             if type == 6: 
-                nameList.append( "Aux_Digital_Input_" + str(channel) + "(V/s)" )
+                nameList.append( "Aux_Digital_Input_" + str(channel) + " (V/s)" )
             if type == 7: 
-                nameList.append( "Aux_Digital_Output_" + str(channel) + "(C/s)" )
+                nameList.append( "Aux_Digital_Output_" + str(channel) + " (C/s)" )
             if type == 8: 
-                nameList.append( "Aux_EC_" + str(channel) + "(C)" )
+                nameList.append( "Aux_EC_" + str(channel) + " (C)" )
             if type == 9: 
-                nameList.append( "Aux_Safety_" + str(channel) + "(psi)" )
+                nameList.append( "Aux_Safety_" + str(channel) + " (psi)" )
             if type == 10: 
-                nameList.append( "Aux_Humidity_" + str(channel) + "(V/s)" )
+                nameList.append( "Aux_Humidity_" + str(channel) + " (V/s)" )
             if type == 11: 
-                nameList.append( "Aux_Analog_Output_" + str(channel) + "(C/s)" )
+                nameList.append( "Aux_Analog_Output_" + str(channel) + " (C/s)" )
             if type == 30: 
-                nameList.append( "Aux_dV/dt_" + str(channel) + "(V/s)" )
+                nameList.append( "Aux_dV/dt_" + str(channel) + " (V/s)" )
             if type == 31: 
-                nameList.append( "Aux_dT/dt_" + str(channel) + "(C/s)" )
+                nameList.append( "Aux_dT/dt_" + str(channel) + " (C/s)" )
 
         return nameList

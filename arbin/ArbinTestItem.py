@@ -71,9 +71,9 @@ class ArbinTestItem( object ):
                                       'Comments': test_list_df.at[0,'Comment'],
                               'Software Version': test_list_df.at[0,'Software_Version'], # ??? DO I WANT TO GET THIS THIS WAY???
                               'Schedule Version': row['Schedule_Version'],
-                                       'MASS(g)': row['SpecificMASS'],
-                       'Specific Capacity(Ah/g)': row['SpecificCapacity'],
-                                  'Capacity(Ah)': row['Capacity'],
+                                       'MASS (g)': row['SpecificMASS'],
+                       'Specific Capacity (Ah/g)': row['SpecificCapacity'],
+                                  'Capacity (Ah)': row['Capacity'],
                                        'Item ID': row['Item_ID'],
                                        'Has Aux': row['Has_Aux'],
                                    'Has Special': row['Has_Special'],
@@ -97,22 +97,22 @@ class ArbinTestItem( object ):
         for index, row in merged_df.iterrows():
             dict_values = {         'Data_Point': row['Data_Point'],
                                      'Date_Time': row['Date_Time'],
-                                 'Test_Times(s)': row['Test_Time'],
-                                 'Step_Times(s)': row['Step_Time'],
+                                 'Test_Times (s)': row['Test_Time'],
+                                 'Step_Times (s)': row['Step_Time'],
                                    'Cycle_Index': row['Cycle_ID'],
                                     'Step_Index': row['Step_ID'],
-                                    'Current(A)': row['Current'],
-                                    'Voltage(V)': row['Voltage'],
-                                      'Power(W)': '',                       # Calculated Value
-                           'Charge_Capacity(Ah)': row['Charge_Capacity'],
-                        'Discharge_Capacity(Ah)': row['Discharge_Capacity'],
-                             'Charge_Energy(Wh)': row['Charge_Energy'],
-                          'Discharge_Energy(Wh)': row['Discharge_Energy'],
-                                      'ACR(Ohm)': row['ACR'],
-                                    'dV/dt(V/s)': row['dV/dt'],
-                      'Internal_Resistance(Ohm)': row['Internal_Resistance'],
-                                   'dQ/dV(Ah/V)': row['dQ/dV'],
-                                   'dV/dQ(V/Ah)': row['dV/dQ'] }
+                                    'Current (A)': row['Current'],
+                                    'Voltage (V)': row['Voltage'],
+                                      'Power (W)': '',                       # Calculated Value
+                           'Charge_Capacity (Ah)': row['Charge_Capacity'],
+                        'Discharge_Capacity (Ah)': row['Discharge_Capacity'],
+                             'Charge_Energy (Wh)': row['Charge_Energy'],
+                          'Discharge_Energy (Wh)': row['Discharge_Energy'],
+                                      'ACR (Ohm)': row['ACR'],
+                                    'dV/dt (V/s)': row['dV/dt'],
+                      'Internal_Resistance (Ohm)': row['Internal_Resistance'],
+                                   'dQ/dV (Ah/V)': row['dQ/dV'],
+                                   'dV/dQ (V/Ah)': row['dV/dQ'] }
             
             for column in list( data_auxiliary_df.columns ):
                 dict_values[column] = row[column]
@@ -131,28 +131,35 @@ class ArbinTestItem( object ):
         statistic_data_df = self.arbin_database.data_statistic( self.testID )
         
         rows_list = []
+        cycle_id = 0
         for index, row in statistic_data_df.iterrows():
+        
+            # Only keep one row for each Cycle_ID
+            if row['Cycle_ID'] == cycle_id:
+                rows_list.pop()
+            
+            cycle_id = row['Cycle_ID']
+        
             coulombic_efficiency = 0
             if row['Charge_Capacity'] != 0:
                 coulombic_efficiency = (row['Discharge_Capacity'] / row['Charge_Capacity']) * 100
         
             dict_values = {          'Date_Time': row['Date_Time'],
-                                 'Test_Times(s)': row['Test_Time'],
-                                 'Step_Times(s)': row['Step_Time'],
+                                 'Test_Times (s)': row['Test_Time'],
+                                 'Step_Times (s)': row['Step_Time'],
                                    'Cycle_Index': row['Cycle_ID'],
                                     'Step_Index': row['Step_ID'],
-                                    'Current(A)': row['Current'],
-                                    'Voltage(V)': row['Voltage'],
-                                      'Power(W)': '',                       # Calculated Value
-                           'Charge_Capacity(Ah)': row['Charge_Capacity'],
-                        'Discharge_Capacity(Ah)': row['Discharge_Capacity'],
-                             'Charge_Energy(Wh)': row['Charge_Energy'],
-                          'Discharge_Energy(Wh)': row['Discharge_Energy'],
-                                'Charge_Time(s)': row['Charge_Time'],
-                             'Discharge_Time(s)': row['Discharge_Time'],
+                                    'Current (A)': row['Current'],
+                                    'Voltage (V)': row['Voltage'],
+                                      'Power (W)': '',                       # Calculated Value
+                           'Charge_Capacity (Ah)': row['Charge_Capacity'],
+                        'Discharge_Capacity (Ah)': row['Discharge_Capacity'],
+                             'Charge_Energy (Wh)': row['Charge_Energy'],
+                          'Discharge_Energy (Wh)': row['Discharge_Energy'],
+                                'Charge_Time (s)': row['Charge_Time'],
+                             'Discharge_Time (s)': row['Discharge_Time'],
                             'V_Max_On_Cycle (V)': row['V_Max_On_Cycle'],
-                       'Coulombic Efficiency %%': coulombic_efficiency,
-                                        'mAh/g' : '' }                      # ???
+                       'Coulombic Efficiency (%)': coulombic_efficiency }
 
             rows_list.append( dict_values )
 
