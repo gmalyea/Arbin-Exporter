@@ -20,7 +20,7 @@ class ArbinWorkbook( object ):
         self.ws1 = self.wb.active
         self.ws1.title = "Global Info"
         self.ws2 = self.wb.create_sheet("Channel")
-        self.ws3 = self.wb.create_sheet("Statistics")
+        self.ws3 = self.wb.create_sheet("StatisticsByCycle")
 
 
     def save_workbook( self, path ):

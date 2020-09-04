@@ -5,8 +5,8 @@ import pyodbc
 import pandas as pd
 import openpyxl
 import openpyxl.utils.dataframe
-from ArbinTestItem import ArbinTestItem
-from ArbinWorkbook import ArbinWorkbook
+from arbin.ArbinTestItem import ArbinTestItem
+from arbin.ArbinWorkbook import ArbinWorkbook
 
 # =============================================================================
 # ArbinExport

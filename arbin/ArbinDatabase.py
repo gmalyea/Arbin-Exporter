@@ -34,52 +34,51 @@ class ArbinDatabase( object ):
             print( "Could not connect to SQL Server, check the connection setting and try again." )
 
 
-    
     def test_list( self ):
-        query = ( "SELECT Test_ID from TestList_Table" )
+        query = ( "SELECT [Test_ID] FROM TestList_Table" )
         return pd.read_sql( query, self.conn_master )
 
 
     def test_list_for( self, testID ):
-        query = ( "SELECT * from TestList_Table WHERE [Test_ID] = " + str(testID) )
+        query = ( "SELECT * FROM TestList_Table WHERE [Test_ID] = " + str(testID) )
         return pd.read_sql( query, self.conn_master )
 
 
     def test_channel_list( self, testID ):
-        query = ( "SELECT * from TestIVChList_Table WHERE [Test_ID] = " + str(testID) )
+        query = ( "SELECT * FROM TestIVChList_Table WHERE [Test_ID] = " + str(testID) )
         return pd.read_sql( query, self.conn_master )
         
 
     def data_basic( self, testID ):
-        query = ( "SELECT * FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY date_time" )
+        query = ( "SELECT * FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time]" )
         return pd.read_sql( query, self.conn_data )
 
         
     def data_extended( self, testID ):
         query = ( "SELECT [Date_Time], [6] as [ACR], [27] as [dV/dt],[30] as [Internal_Resistance], [82] as [dQ/dV], [83] as [dV/dQ]"
                        "FROM (SELECT * FROM IV_Extended_Table WHERE [Test_ID] = " + str(testID) + ") as tbl "
-                       "PIVOT (SUM([Data_value]) FOR [Data_Type] IN ([6],[27],[30],[82],[83])) as pvt ORDER BY date_time" )
+                       "PIVOT (SUM([Data_value]) FOR [Data_Type] IN ([6],[27],[30],[82],[83])) as pvt ORDER BY [Date_Time]" )
         return pd.read_sql( query, self.conn_data )
       
       
     def data_statistic( self, testID ):
-        query = ( "SELECT * from StatisticData_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY date_time" )
+        query = ( "SELECT * FROM StatisticData_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time]" )
         return pd.read_sql( query, self.conn_data )
         
         
     def data_auxiliary( self, testID ):
         # Get the aux map
-        query = ( "SELECT [Aux_Map] from TestIVChList_Table WHERE [Test_ID] = " + str(testID) )
+        query = ( "SELECT [Aux_Map] FROM TestIVChList_Table WHERE [Test_ID] = " + str(testID) )
         df = pd.read_sql( query, self.conn_master )
         auxiliary_map = df.at[0, "Aux_Map"]
-        auxiliary_type_channel_pair = re.findall( '([0-9]+)\^([0-9]+);', auxiliary_map )
+        auxiliary_type_channel_pair = re.findall( '([0-9]+)\^([0-9]+)', auxiliary_map )
         
         # Get start and end times
-        query = ( "SELECT [Date_Time] from IV_Basic_Table WHERE [Test_ID] = " + str(testID) )
+        query = ( "SELECT [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) )
         df = pd.read_sql( query, self.conn_data )
         start_date_time = df.at[0, "Date_Time"]
         end_date_time = df.at[df.index[-1], "Date_Time"]
-
+        
         df = pd.DataFrame()
         
         for pair in auxiliary_type_channel_pair:

@@ -1,9 +1,9 @@
 import sys
 import pyodbc
 import pandas as pd
-from ArbinDatabase import ArbinDatabase
-from ArbinTestItem import ArbinTestItem
-from ArbinExport import ArbinExport
+from arbin.ArbinDatabase import ArbinDatabase
+from arbin.ArbinTestItem import ArbinTestItem
+from arbin.ArbinExport import ArbinExport
 
 # =============================================================================
 # Exporter
@@ -24,7 +24,6 @@ from ArbinExport import ArbinExport
 # - single channel aux data? - Test #46
 # - Need to set properties or just use methods?
 # - Clean up cell formatters
-# - Python standard file organization
 # - Statistics tab is "StatisticsByCycle"?
 # - Channel and Statistics no "A" column?
 # - Channel and Statistics DateTime doesn't scroll
@@ -33,6 +32,13 @@ from ArbinExport import ArbinExport
 #
 # MINREST-2:
 # - Channel Sheet Aux data
+#
+#
+# QUESTIONS
+# - Statistics doesn't have every row. - only export last row per cycle index
+# - Statistics: mAh/g
+# - Aux: V C vs V/s C/s
+# - Statistics: Aux data same?
 # =============================================================================
 
 

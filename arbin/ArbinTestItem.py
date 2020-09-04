@@ -1,6 +1,6 @@
 import sys
 import pandas as pd
-from ArbinDatabase import ArbinDatabase
+from arbin.ArbinDatabase import ArbinDatabase
 
 # =============================================================================
 # ArbinTestItem
@@ -103,7 +103,7 @@ class ArbinTestItem( object ):
                                     'Step_Index': row['Step_ID'],
                                     'Current(A)': row['Current'],
                                     'Voltage(V)': row['Voltage'],
-                                      'Power(W)': '',                               # Calculated Value
+                                      'Power(W)': '',                       # Calculated Value
                            'Charge_Capacity(Ah)': row['Charge_Capacity'],
                         'Discharge_Capacity(Ah)': row['Discharge_Capacity'],
                              'Charge_Energy(Wh)': row['Charge_Energy'],
@@ -132,6 +132,10 @@ class ArbinTestItem( object ):
         
         rows_list = []
         for index, row in statistic_data_df.iterrows():
+            coulombic_efficiency = 0
+            if row['Charge_Capacity'] != 0:
+                coulombic_efficiency = (row['Discharge_Capacity'] / row['Charge_Capacity']) * 100
+        
             dict_values = {          'Date_Time': row['Date_Time'],
                                  'Test_Times(s)': row['Test_Time'],
                                  'Step_Times(s)': row['Step_Time'],
@@ -139,6 +143,7 @@ class ArbinTestItem( object ):
                                     'Step_Index': row['Step_ID'],
                                     'Current(A)': row['Current'],
                                     'Voltage(V)': row['Voltage'],
+                                      'Power(W)': '',                       # Calculated Value
                            'Charge_Capacity(Ah)': row['Charge_Capacity'],
                         'Discharge_Capacity(Ah)': row['Discharge_Capacity'],
                              'Charge_Energy(Wh)': row['Charge_Energy'],
@@ -146,7 +151,8 @@ class ArbinTestItem( object ):
                                 'Charge_Time(s)': row['Charge_Time'],
                              'Discharge_Time(s)': row['Discharge_Time'],
                             'V_Max_On_Cycle (V)': row['V_Max_On_Cycle'],
-                       'Coulombic Efficiency %%': ''}   #row['Discharge_Capacity'] * 100 /NULLIF(row['Charge_Capacity'],0) }
+                       'Coulombic Efficiency %%': coulombic_efficiency,
+                                        'mAh/g' : '' }                      # ???
 
             rows_list.append( dict_values )
 
