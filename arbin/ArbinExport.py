@@ -56,7 +56,7 @@ class ArbinExport( object ):
         device_id = self.arbinTestItem.device_id
         current_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
             
-        worksheet.append(['','','','TEST REPORT','Processed by: export.py'])
+        worksheet.append(['','','','TEST REPORT','Processed by: exporter.py'])
         worksheet.append(['','','Test Name',test_name,'Serial Number'])
         worksheet.append(['','','Export Time',current_date,device_id])
         
