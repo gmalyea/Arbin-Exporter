@@ -19,9 +19,7 @@ from arbin.ArbinExport import ArbinExport
 # Issues
 # -----------------------------------------------------------------------------
 # - Data is only in one database - need to handle multiple databases
-# - drop incomplete rows?
 # - single channel aux data? - Test #46
-# - Clean up cell formatters
 # - Statistics: Vmax, Coulombic, mAh/g, Aux
 # - Timezone: is time off by 1 hour?
 #

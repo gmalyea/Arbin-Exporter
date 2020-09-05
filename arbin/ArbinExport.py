@@ -65,18 +65,13 @@ class ArbinExport( object ):
         for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
             worksheet.append( row )
              
-        # Green header background        
-        ArbinWorkbook.background_color( worksheet, 3, 'CEFFCE' )
-        
-        # Bottom border       
-        ArbinWorkbook.bottom_border( worksheet, 3 )
-        
-        ArbinWorkbook.right_justify( worksheet, 'C2' )
-        ArbinWorkbook.right_justify( worksheet, 'C3' )
-        ArbinWorkbook.right_justify( worksheet, 'D2' )
-        ArbinWorkbook.right_justify( worksheet, 'D3' )
-        
-        # Resize cells to fit  
+        # Format Cells       
+        ArbinWorkbook.background_color( worksheet, 3, 'CEFFCE' ) # Green     
+        ArbinWorkbook.border_bottom( worksheet, 3 )
+        ArbinWorkbook.justify_right( worksheet, 'C2' )
+        ArbinWorkbook.justify_right( worksheet, 'C3' )
+        ArbinWorkbook.justify_right( worksheet, 'D2' )
+        ArbinWorkbook.justify_right( worksheet, 'D3' )
         ArbinWorkbook.resize_cells( worksheet, slice(1,5) )
              
 
@@ -89,13 +84,9 @@ class ArbinExport( object ):
         for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
             worksheet.append( row )
     
-        # Blue header background
-        ArbinWorkbook.background_color( worksheet, 0, 'CEFFFF' )
-        
-        # Bottom border       
-        ArbinWorkbook.bottom_border( worksheet, 0 )
-    
-        # Resize cells to fit
+        # Format Cells
+        ArbinWorkbook.background_color( worksheet, 0, 'CEFFFF' ) # Blue 
+        ArbinWorkbook.border_bottom( worksheet, 0 )
         ArbinWorkbook.resize_cells( worksheet, slice(0,2) )
 
     
@@ -105,13 +96,9 @@ class ArbinExport( object ):
         for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
             worksheet.append( row )
     
-        # Blue header background
-        ArbinWorkbook.background_color( worksheet, 0, 'CEFFFF' )
-    
-        # Bottom border       
-        ArbinWorkbook.bottom_border( worksheet, 0 )
-    
-        # Resize cells to fit
+        # Format Cells
+        ArbinWorkbook.background_color( worksheet, 0, 'CEFFFF' ) # Blue     
+        ArbinWorkbook.border_bottom( worksheet, 0 )
         ArbinWorkbook.resize_cells( worksheet, slice(0,2) )
         
         

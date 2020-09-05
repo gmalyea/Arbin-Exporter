@@ -34,23 +34,20 @@ class ArbinWorkbook( object ):
     # --------------------------------------------------------------------------------------
     @staticmethod
     def background_color( worksheet, row, color ):
-        backgroundFill = openpyxl.styles.fills.PatternFill( start_color=color, end_color=color, fill_type='solid' )
         for cell in list(worksheet.rows)[row]:
-            cell.fill = backgroundFill
+            cell.fill = openpyxl.styles.fills.PatternFill( start_color=color, end_color=color, fill_type='solid' )
             
             
     @staticmethod
-    def bottom_border( worksheet, row ):
-        border = openpyxl.styles.borders.Border(bottom=openpyxl.styles.borders.Side(style='thin'))       
+    def border_bottom( worksheet, row ):
         for cell in list(worksheet.rows)[row]:
-            cell.border = border
+            cell.border = openpyxl.styles.borders.Border(bottom=openpyxl.styles.borders.Side(style='thin'))     
 
 
     @staticmethod
-    def right_justify( worksheet, column_row ):
-        alignment = openpyxl.styles.Alignment(horizontal='right')
+    def justify_right( worksheet, column_row ):
         cell = worksheet[column_row]
-        cell.alignment = alignment
+        cell.alignment = openpyxl.styles.Alignment(horizontal='right')
 
 
     @staticmethod
