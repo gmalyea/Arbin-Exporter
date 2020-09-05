@@ -97,7 +97,7 @@ class ArbinExport( object ):
     
         # Resize cells to fit
         ArbinWorkbook.resize_cells( worksheet, slice(0,2) )
-    
+
     
     def export_statistics_sheet( self, worksheet ):
         df = self.arbinTestItem.cycle_statistics_df
@@ -113,3 +113,5 @@ class ArbinExport( object ):
     
         # Resize cells to fit
         ArbinWorkbook.resize_cells( worksheet, slice(0,2) )
+        
+        

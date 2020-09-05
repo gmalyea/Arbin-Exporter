@@ -103,7 +103,7 @@ class ArbinTestItem( object ):
                                     'Step_Index': row['Step_ID'],
                                     'Current (A)': row['Current'],
                                     'Voltage (V)': row['Voltage'],
-                                      'Power (W)': '',                       # Calculated Value
+                                      'Power (W)': '', # Calculated Value
                            'Charge_Capacity (Ah)': row['Charge_Capacity'],
                         'Discharge_Capacity (Ah)': row['Discharge_Capacity'],
                              'Charge_Energy (Wh)': row['Charge_Energy'],
@@ -119,12 +119,7 @@ class ArbinTestItem( object ):
             
             rows_list.append( dict_values )
 
-        df = pd.DataFrame( rows_list )
-        df.dropna(subset=['Data_Point'], inplace=True)
-        return df
-        #return pd.DataFrame( rows_list )
-        
-        #  WHAT IS THIS ALL ABOUT above?????
+        return pd.DataFrame( rows_list )
 
 
     def get_cycle_statistics( self ):
@@ -151,7 +146,7 @@ class ArbinTestItem( object ):
                                     'Step_Index': row['Step_ID'],
                                     'Current (A)': row['Current'],
                                     'Voltage (V)': row['Voltage'],
-                                      'Power (W)': '',                       # Calculated Value
+                                      'Power (W)': '', # Calculated Value
                            'Charge_Capacity (Ah)': row['Charge_Capacity'],
                         'Discharge_Capacity (Ah)': row['Discharge_Capacity'],
                              'Charge_Energy (Wh)': row['Charge_Energy'],

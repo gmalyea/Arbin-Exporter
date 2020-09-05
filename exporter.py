@@ -18,18 +18,12 @@ from arbin.ArbinExport import ArbinExport
 #
 # Issues
 # -----------------------------------------------------------------------------
-# - Tests are only on one channel?
-# - Data is only in one database?
+# - Data is only in one database - need to handle multiple databases
 # - drop incomplete rows?
 # - single channel aux data? - Test #46
-# - Need to set properties or just use methods?
 # - Clean up cell formatters
-# - Statistics tab is "StatisticsByCycle"?
-# - Channel and Statistics no "A" column?
-# - Channel and Statistics DateTime doesn't scroll
-# - Statistics need Power after Voltage
 # - Statistics: Vmax, Coulombic, mAh/g, Aux
-#
+# - Timezone: is time off by 1 hour?
 #
 # QUESTIONS
 # - Channel number in worksheet names?
