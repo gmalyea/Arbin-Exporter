@@ -30,33 +30,35 @@ class ArbinDatabase( object ):
             print( "Could not connect to SQL Server, check the connection setting and try again." )
         
         self.conn_data = {}
-        data_databases_df = self.list_database_data()
-        for index, row in data_databases_df.iterrows():
-            db_name = row['Database_Name']
+        databases = self.list_database_data()
+        for db_name in databases:
             try:
                 self.conn_data[db_name] = pyodbc.connect( 'DRIVER={ODBC Driver 17 for SQL Server}; SERVER='+server+'; DATABASE='+db_name+'; UID='+username+'; PWD='+password )
             except Exception as e:
                 print( "Could not connect to SQL Server, check the connection setting and try again." )
             
-
-
+    # Return Python Lists
+    # -----------------------------------------------------------------------------
     def list_database_data( self ):
         query = ( "SELECT [Database_Name] FROM DatabaseName_Table" )
         df = pd.read_sql( query, self.conn_master )
-        return pd.read_sql( query, self.conn_master )
+        return df['Database_Name'].tolist()
 
     
     def list_database_data_for( self, testID ):
         query = ( "SELECT [Databases] FROM TestIVChList_Table WHERE [Test_ID] = " + str(testID) )
-        df = pd.read_sql( query, self.conn_master )        
+        df = pd.read_sql( query, self.conn_master )
         return re.findall( '(\w+),', df.at[0, "Databases"] )
 
 
-    def test_list( self ):
+    def list_tests( self ):
         query = ( "SELECT [Test_ID] FROM TestList_Table" )
-        return pd.read_sql( query, self.conn_master )
+        df = pd.read_sql( query, self.conn_master )
+        return df['Test_ID'].tolist()
 
 
+    # Return Pandas DataFrames
+    # -----------------------------------------------------------------------------
     def test_list_for( self, testID ):
         query = ( "SELECT * FROM TestList_Table WHERE [Test_ID] = " + str(testID) )
         return pd.read_sql( query, self.conn_master )
@@ -145,7 +147,6 @@ class ArbinDatabase( object ):
     # --------------------------------------------------------------------------------------
     # Utilities
     # --------------------------------------------------------------------------------------
-    
     def get_aux_data_type( self, data_code ):
         if data_code == "0": #Voltage and dV/dt
             return [0,30]

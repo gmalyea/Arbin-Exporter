@@ -18,9 +18,9 @@ from arbin.ArbinExport import ArbinExport
 #
 # Issues
 # -----------------------------------------------------------------------------
-# - Data is only in one database - need to handle multiple databases
 # - single channel aux data? - Test #46
 # - Timezone: is time off by 1 hour?
+# - No command line test input doesn't work - need to figure out interface
 #
 # QUESTIONS
 # - Channel number in worksheet names?
@@ -42,17 +42,18 @@ arbinDatabase = ArbinDatabase( SERVER, USERNAME, PASSWORD )
 # Get Tests and Process
 # -----------------------------------------------------------------------------
 if sys.argv[1] != "":
-    tests = pd.DataFrame(sys.argv[1:], columns = ['Test_ID']) 
+    #tests = pd.DataFrame(sys.argv[1:], columns = ['Test_ID'])
+    tests = sys.argv[1:]
 else:
-    tests = arbinDatabase.test_list()
+    tests = arbinDatabase.list_tests()
 
-for index, row in tests.iterrows():
+for test_id in tests:
     # Get Test ID
-    testID = row['Test_ID']
+    #testID = row['Test_ID']
     
     # Process Test
-    print( "Processing Test ID: " + str(testID) )
-    arbinTest = ArbinTestItem( testID, arbinDatabase )
+    print( "Processing Test ID: " + str(test_id) )
+    arbinTest = ArbinTestItem( test_id, arbinDatabase )
     
     # Export
     arbinExport = ArbinExport( arbinTest )
