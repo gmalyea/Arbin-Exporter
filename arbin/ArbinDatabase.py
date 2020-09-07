@@ -7,9 +7,9 @@ import pandas as pd
 # ArbinDatabase
 # -----------------------------------------------------------------------------
 # 
-#
-#
-#
+# ASSUMPTIONS
+# - A test will write to multiple databases in order.
+# - All info is in the Master Database.
 #
 # =============================================================================
 
@@ -17,8 +17,6 @@ import pandas as pd
 # SQL Server Arbin Database Constants
 # -----------------------------------------------------------------------------
 DATABASE_MASTER = 'ArbinPro8MasterInfo'
-DATABASE_INFO = 'ArbinPro8Info_1'
-DATABASE_DATA = 'ArbinPro8Data_1'
 
 
 class ArbinDatabase( object ):
@@ -28,10 +26,30 @@ class ArbinDatabase( object ):
     def __init__( self, server, username, password ):
         try:
             self.conn_master = pyodbc.connect( 'DRIVER={ODBC Driver 17 for SQL Server}; SERVER='+server+'; DATABASE='+DATABASE_MASTER+'; UID='+username+'; PWD='+password )
-            self.conn_info = pyodbc.connect( 'DRIVER={ODBC Driver 17 for SQL Server}; SERVER='+server+'; DATABASE='+DATABASE_INFO+'; UID='+username+'; PWD='+password )
-            self.conn_data = pyodbc.connect( 'DRIVER={ODBC Driver 17 for SQL Server}; SERVER='+server+'; DATABASE='+DATABASE_DATA+'; UID='+username+'; PWD='+password )
         except Exception as e:
             print( "Could not connect to SQL Server, check the connection setting and try again." )
+        
+        self.conn_data = {}
+        data_databases_df = self.list_database_data()
+        for index, row in data_databases_df.iterrows():
+            db_name = row['Database_Name']
+            try:
+                self.conn_data[db_name] = pyodbc.connect( 'DRIVER={ODBC Driver 17 for SQL Server}; SERVER='+server+'; DATABASE='+db_name+'; UID='+username+'; PWD='+password )
+            except Exception as e:
+                print( "Could not connect to SQL Server, check the connection setting and try again." )
+            
+
+
+    def list_database_data( self ):
+        query = ( "SELECT [Database_Name] FROM DatabaseName_Table" )
+        df = pd.read_sql( query, self.conn_master )
+        return pd.read_sql( query, self.conn_master )
+
+    
+    def list_database_data_for( self, testID ):
+        query = ( "SELECT [Databases] FROM TestIVChList_Table WHERE [Test_ID] = " + str(testID) )
+        df = pd.read_sql( query, self.conn_master )        
+        return re.findall( '(\w+),', df.at[0, "Databases"] )
 
 
     def test_list( self ):
@@ -51,19 +69,37 @@ class ArbinDatabase( object ):
 
     def data_basic( self, testID ):
         query = ( "SELECT * FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time]" )
-        return pd.read_sql( query, self.conn_data )
-
+        df_combined = pd.DataFrame()
+        databases = self.list_database_data_for( testID )
+        for db in databases:
+            df = pd.read_sql( query, self.conn_data[db] )
+            df_combined = df_combined.append(df, ignore_index=True)
         
+        return df_combined
+    
+    
     def data_extended( self, testID ):
         query = ( "SELECT [Date_Time], [6] as [ACR], [27] as [dV/dt],[30] as [Internal_Resistance], [82] as [dQ/dV], [83] as [dV/dQ]"
                        "FROM (SELECT * FROM IV_Extended_Table WHERE [Test_ID] = " + str(testID) + ") as tbl "
                        "PIVOT (SUM([Data_value]) FOR [Data_Type] IN ([6],[27],[30],[82],[83])) as pvt ORDER BY [Date_Time]" )
-        return pd.read_sql( query, self.conn_data )
+        df_combined = pd.DataFrame()
+        databases = self.list_database_data_for( testID )
+        for db in databases:
+            df = pd.read_sql( query, self.conn_data[db] )
+            df_combined = df_combined.append(df, ignore_index=True)
+        
+        return df_combined
       
       
     def data_statistic( self, testID ):
         query = ( "SELECT * FROM StatisticData_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time]" )
-        return pd.read_sql( query, self.conn_data )
+        df_combined = pd.DataFrame()
+        databases = self.list_database_data_for( testID )
+        for db in databases:
+            df = pd.read_sql( query, self.conn_data[db] )
+            df_combined = df_combined.append(df, ignore_index=True)
+        
+        return df_combined
         
         
     def data_auxiliary( self, testID ):
@@ -73,31 +109,37 @@ class ArbinDatabase( object ):
         auxiliary_map = df.at[0, "Aux_Map"]
         auxiliary_type_channel_pair = re.findall( '([0-9]+)\^([0-9]+)', auxiliary_map )
         
-        # Get start and end times
-        query = ( "SELECT [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) )
-        df = pd.read_sql( query, self.conn_data )
-        start_date_time = df.at[0, "Date_Time"]
-        end_date_time = df.at[df.index[-1], "Date_Time"]
+        df_combined = pd.DataFrame()
+        databases = self.list_database_data_for( testID )
+        for db in databases:
         
-        df = pd.DataFrame()
+            # Get start and end times
+            query = ( "SELECT [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) )
+            df = pd.read_sql( query, self.conn_data[db] )
+            start_date_time = df.at[0, "Date_Time"]
+            end_date_time = df.at[df.index[-1], "Date_Time"]
         
-        for pair in auxiliary_type_channel_pair:
-            aux_type = pair[0]
-            aux_channel = pair[1]
-            
-            aux_type_expanded = self.get_aux_data_type( aux_type )
-            aux_name = self.get_aux_column_name( aux_type_expanded, aux_channel )
-            
-            query = ( "SELECT [Date_Time] as [Date_Time_Aux], [" + str(aux_type_expanded[0]) + "] as [" + str(aux_name[0]) + "], [" + str(aux_type_expanded[1]) + "] as [" + str(aux_name[1]) + "] "
-                              "FROM (SELECT * FROM Auxiliary_Table WHERE [AuxCh_Type] = " + str(aux_type_expanded[0]) + " AND [AuxCh_ID] = " + str(aux_channel) + " AND [Date_Time] > " + str(start_date_time) + " AND [Date_Time] < " + str(end_date_time) + ") AS tbl "
-                              "PIVOT (SUM(Data_Value) FOR Data_Type IN ([" + str(aux_type_expanded[0]) + "], [" + str(aux_type_expanded[1]) + "])) AS pvt ORDER BY [Date_Time_Aux]" )
-            
-            aux_df = pd.read_sql( query, self.conn_data )
-            
-            df = pd.concat( [df, aux_df], axis=1 )
-            df = df.drop( columns=['Date_Time_Aux'] )
+            df = pd.DataFrame()
         
-        return df
+            for pair in auxiliary_type_channel_pair:
+                aux_type = pair[0]
+                aux_channel = pair[1]
+            
+                aux_type_expanded = self.get_aux_data_type( aux_type )
+                aux_name = self.get_aux_column_name( aux_type_expanded, aux_channel )
+            
+                query = ( "SELECT [Date_Time] as [Date_Time_Aux], [" + str(aux_type_expanded[0]) + "] as [" + str(aux_name[0]) + "], [" + str(aux_type_expanded[1]) + "] as [" + str(aux_name[1]) + "] "
+                                  "FROM (SELECT * FROM Auxiliary_Table WHERE [AuxCh_Type] = " + str(aux_type_expanded[0]) + " AND [AuxCh_ID] = " + str(aux_channel) + " AND [Date_Time] > " + str(start_date_time) + " AND [Date_Time] < " + str(end_date_time) + ") AS tbl "
+                                  "PIVOT (SUM(Data_Value) FOR Data_Type IN ([" + str(aux_type_expanded[0]) + "], [" + str(aux_type_expanded[1]) + "])) AS pvt ORDER BY [Date_Time_Aux]" )
+            
+                aux_df = pd.read_sql( query, self.conn_data[db] )
+            
+                df = pd.concat( [df, aux_df], axis=1 )
+                df = df.drop( columns=['Date_Time_Aux'] )
+        
+            df_combined = df_combined.append(df, ignore_index=True)
+            
+        return df_combined
         
         
     # --------------------------------------------------------------------------------------

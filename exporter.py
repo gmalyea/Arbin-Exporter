@@ -11,16 +11,15 @@ from arbin.ArbinExport import ArbinExport
 # Usage
 # -----------------------------------------------------------------------------
 # To export all tests:
-# >python export.py
+# >python exporter.py
 #
 # To export specific Test_IDs:
-# >python export.py Test_ID1 Test_ID2 Test_ID3 etc...
+# >python exporter.py Test_ID1 Test_ID2 Test_ID3 etc...
 #
 # Issues
 # -----------------------------------------------------------------------------
 # - Data is only in one database - need to handle multiple databases
 # - single channel aux data? - Test #46
-# - Statistics: Vmax, Coulombic, mAh/g, Aux
 # - Timezone: is time off by 1 hour?
 #
 # QUESTIONS
@@ -57,7 +56,7 @@ for index, row in tests.iterrows():
     
     # Export
     arbinExport = ArbinExport( arbinTest )
-    arbinExport.save_workbook( "Output/" )
+    arbinExport.save_workbook( "../Exporter Output/" )
     
     
 

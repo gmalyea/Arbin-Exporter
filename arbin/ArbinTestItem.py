@@ -37,15 +37,7 @@ class ArbinTestItem( object ):
         self.raw_data_df = self.convert_date_time( self.raw_data_df, 'Date_Time', 'ns', 100 )
         self.cycle_statistics_df = self.convert_date_time( self.cycle_statistics_df, 'Date_Time', 'ns', 100 )
 
-
-    def has_auxiliary( self ):
-        test_channel_list_df = self.arbin_database.test_channel_list( self.testID )
-        
-        if( test_channel_list_df.at[0, 'Log_Aux_Data_Flag'] == 1):
-            return True
-        return False
-
-            
+   
     def test_name( self ):
         test_list_df = self.arbin_database.test_list_for( self.testID )
         return test_list_df.at[0,'Test_Name']
@@ -54,6 +46,16 @@ class ArbinTestItem( object ):
         test_list_df = self.arbin_database.test_list_for( self.testID )
         return test_list_df.at[0,'Device_ID']
     
+    def has_auxiliary( self ):
+        test_channel_list_df = self.arbin_database.test_channel_list( self.testID )
+        
+        if( test_channel_list_df.at[0, 'Log_Aux_Data_Flag'] == 1):
+            return True
+        return False
+
+    
+    
+    # THIS NEEDS UPDATING FROM ???  MAYBE NOT MULTIPLE DATABASES HANDLGED?
     def raw_data_count( self ):
         return self.raw_data_df['Data_Point'].count()
         
@@ -71,9 +73,9 @@ class ArbinTestItem( object ):
                                       'Comments': test_list_df.at[0,'Comment'],
                               'Software Version': test_list_df.at[0,'Software_Version'], # ??? DO I WANT TO GET THIS THIS WAY???
                               'Schedule Version': row['Schedule_Version'],
-                                       'MASS (g)': row['SpecificMASS'],
-                       'Specific Capacity (Ah/g)': row['SpecificCapacity'],
-                                  'Capacity (Ah)': row['Capacity'],
+                                      'MASS (g)': row['SpecificMASS'],
+                      'Specific Capacity (Ah/g)': row['SpecificCapacity'],
+                                 'Capacity (Ah)': row['Capacity'],
                                        'Item ID': row['Item_ID'],
                                        'Has Aux': row['Has_Aux'],
                                    'Has Special': row['Has_Special'],
@@ -86,6 +88,7 @@ class ArbinTestItem( object ):
         
         
     def get_raw_data( self ):
+
         data_basic_df = self.arbin_database.data_basic( self.testID )
         data_extended_df = self.arbin_database.data_extended( self.testID )
         merged_df = pd.merge( data_basic_df, data_extended_df, on='Date_Time', how='outer' )
@@ -118,7 +121,7 @@ class ArbinTestItem( object ):
                 dict_values[column] = row[column]
             
             rows_list.append( dict_values )
-
+            
         return pd.DataFrame( rows_list )
 
 
