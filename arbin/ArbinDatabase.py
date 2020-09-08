@@ -59,6 +59,14 @@ class ArbinDatabase( object ):
 
     # Return Pandas DataFrames
     # -----------------------------------------------------------------------------
+    def tests_all_detailed( self ):
+        query = ( "SELECT TestList_Table.Test_ID, TestList_Table.Test_Name, TestList_Table.First_Start_DateTime, "
+                  "TestIVChList_Table.IV_Ch_ID, TestIVChList_Table.Schedule_File_Name "
+                  "FROM TestList_Table INNER JOIN TestIVChList_Table ON TestList_Table.Test_ID = TestIVChList_Table.Test_ID" )
+
+        
+        return pd.read_sql( query, self.conn_master )
+    
     def test_list_for( self, testID ):
         query = ( "SELECT * FROM TestList_Table WHERE [Test_ID] = " + str(testID) )
         return pd.read_sql( query, self.conn_master )
@@ -81,7 +89,7 @@ class ArbinDatabase( object ):
     
     
     def data_extended( self, testID ):
-        query = ( "SELECT [Date_Time], [6] as [ACR], [27] as [dV/dt],[30] as [Internal_Resistance], [82] as [dQ/dV], [83] as [dV/dQ]"
+        query = ( "SELECT [Date_Time], [6] as [ACR], [27] as [dV/dt],[30] as [Internal_Resistance], [82] as [dQ/dV], [83] as [dV/dQ] "
                        "FROM (SELECT * FROM IV_Extended_Table WHERE [Test_ID] = " + str(testID) + ") as tbl "
                        "PIVOT (SUM([Data_value]) FOR [Data_Type] IN ([6],[27],[30],[82],[83])) as pvt ORDER BY [Date_Time]" )
         df_combined = pd.DataFrame()

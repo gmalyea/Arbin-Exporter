@@ -168,7 +168,9 @@ class ArbinTestItem( object ):
     # --------------------------------------------------------------------------------------
     # Utilities
     # --------------------------------------------------------------------------------------
-    def convert_date_time( self, df, column_name, unit, multiplier ):
+    # HOPEFULLY I DIDN'T BREAK THIS TURNING IT INTO A STATICMETHOD
+    @staticmethod
+    def convert_date_time( df, column_name, unit, multiplier ):
         df[column_name] = df[column_name].apply( lambda x: x * multiplier )
         df[column_name] = pd.to_datetime(df[column_name], unit=unit, errors = 'coerce' )
         df[column_name] = pd.DatetimeIndex(df[column_name]).tz_localize('UTC').tz_convert(TIMEZONE).strftime('%Y-%m-%d %H:%M:%S.%f')
