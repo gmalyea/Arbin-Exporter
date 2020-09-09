@@ -29,10 +29,12 @@ from arbin.ArbinExport import ArbinExport
 # - Timezone: is time off by 1 hour?
 # - Need to figure out if new export needed based on age of data
 # - Test #50 - missing last row of Aux data.  Bug?  Drop row?
+# - Check if Test_ID inputted is valid
 #
 # QUESTIONS
 # - Channel number in worksheet names?
 # - Resume Table
+# - If two test have same name, overwrite?
 # =============================================================================
 
 
@@ -96,4 +98,4 @@ for test_id in tests:
     
     
 
-print( "END" )
+print( "DONE" )
