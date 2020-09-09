@@ -1,3 +1,4 @@
+import os
 import sys
 import argparse
 import pyodbc
@@ -25,14 +26,13 @@ from arbin.ArbinExport import ArbinExport
 #
 # Issues
 # -----------------------------------------------------------------------------
-# - single channel aux data? - Test #46
 # - Timezone: is time off by 1 hour?
-# - No command line test input doesn't work - need to figure out interface
+# - Need to figure out if new export needed based on age of data
+# - Test #50 - missing last row of Aux data.  Bug?  Drop row?
 #
 # QUESTIONS
 # - Channel number in worksheet names?
 # - Resume Table
-# - Test Name vs Schedule Name
 # =============================================================================
 
 
@@ -41,22 +41,20 @@ from arbin.ArbinExport import ArbinExport
 SERVER = 'localhost'
 USERNAME = 'sa'
 PASSWORD = 'Garret2020'
+OUTPUTPATH = "../Exporter Output/"
 
 
-# Parse the Command-Line
+# Parse the Command-Line Arguments
+# -----------------------------------------------------------------------------
+# Using Python's included argparse
+#  https://docs.python.org/3.3/library/argparse.html
+#  https://docs.python.org/3/howto/argparse.html
 # -----------------------------------------------------------------------------
 parser = argparse.ArgumentParser(description='Exports Arbin data as Excel files.')
-#parser.add_argument('tests', type=int, help='list of specific Test_IDs to process')
+parser.add_argument('tests', nargs='*', type=int, help='list of specific Test_IDs to process')
 parser.add_argument('-l', '--list', action='store_true', help='display a list of all tests in the database')
-#parser.add_argument('-o', '--output', dest='accumulate', action='store_const', help='specify an output folder')
-
+parser.add_argument('-o', '--output', action='store', help='specify an output folder')
 args = parser.parse_args()
-
-
-
-
-
-
 
 
 # Connect to the database
@@ -64,7 +62,7 @@ args = parser.parse_args()
 arbinDatabase = ArbinDatabase( SERVER, USERNAME, PASSWORD )
 
 
-# Get Tests and Process
+# Command-Line: List
 # -----------------------------------------------------------------------------
 if args.list:
     list_df = arbinDatabase.tests_all_detailed()
@@ -72,23 +70,29 @@ if args.list:
     print( df.sort_values('Test_ID').to_string(index=False) )
     exit()
 
-if sys.argv[1] != "":
-    #tests = pd.DataFrame(sys.argv[1:], columns = ['Test_ID'])
-    tests = sys.argv[1:]
+
+# Command-Line: Output
+# -----------------------------------------------------------------------------
+if args.output:
+    OUTPUTPATH = args.output
+    
+
+# Get Tests and Process
+# -----------------------------------------------------------------------------
+if args.tests:
+    tests = args.tests
 else:
     tests = arbinDatabase.list_tests()
 
+
 for test_id in tests:
-    # Get Test ID
-    #testID = row['Test_ID']
-    
     # Process Test
     print( "Processing Test ID: " + str(test_id) )
     arbinTest = ArbinTestItem( test_id, arbinDatabase )
     
     # Export
     arbinExport = ArbinExport( arbinTest )
-    arbinExport.save_workbook( "../Exporter Output/" )
+    arbinExport.save_workbook( OUTPUTPATH )
     
     
 

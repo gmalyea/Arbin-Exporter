@@ -52,7 +52,7 @@ class ArbinDatabase( object ):
 
 
     def list_tests( self ):
-        query = ( "SELECT [Test_ID] FROM TestList_Table" )
+        query = ( "SELECT [Test_ID] FROM TestIVChList_Table" )
         df = pd.read_sql( query, self.conn_master )
         return df['Test_ID'].tolist()
 
@@ -138,10 +138,21 @@ class ArbinDatabase( object ):
                 aux_type_expanded = self.get_aux_data_type( aux_type )
                 aux_name = self.get_aux_column_name( aux_type_expanded, aux_channel )
             
-                query = ( "SELECT [Date_Time] as [Date_Time_Aux], [" + str(aux_type_expanded[0]) + "] as [" + str(aux_name[0]) + "], [" + str(aux_type_expanded[1]) + "] as [" + str(aux_name[1]) + "] "
-                                  "FROM (SELECT * FROM Auxiliary_Table WHERE [AuxCh_Type] = " + str(aux_type_expanded[0]) + " AND [AuxCh_ID] = " + str(aux_channel) + " AND [Date_Time] > " + str(start_date_time) + " AND [Date_Time] < " + str(end_date_time) + ") AS tbl "
-                                  "PIVOT (SUM(Data_Value) FOR Data_Type IN ([" + str(aux_type_expanded[0]) + "], [" + str(aux_type_expanded[1]) + "])) AS pvt ORDER BY [Date_Time_Aux]" )
+                print(aux_type_expanded)
+                print(aux_name)
             
+                # This is gross
+                if len(aux_type_expanded) == 1:
+                    query = ( "SELECT [Date_Time] as [Date_Time_Aux], [" + str(aux_type_expanded[0]) + "] as [" + str(aux_name[0]) + "] "
+                              "FROM (SELECT * FROM Auxiliary_Table WHERE [AuxCh_Type] = " + str(aux_type_expanded[0]) + " AND [AuxCh_ID] = " + str(aux_channel) + " AND [Date_Time] > " + str(start_date_time) + " AND [Date_Time] < " + str(end_date_time) + ") AS tbl "
+                              "PIVOT (SUM(Data_Value) FOR Data_Type IN ([" + str(aux_type_expanded[0]) + "])) AS pvt ORDER BY [Date_Time_Aux]" )             
+                else:
+                    query = ( "SELECT [Date_Time] as [Date_Time_Aux], [" + str(aux_type_expanded[0]) + "] as [" + str(aux_name[0]) + "], [" + str(aux_type_expanded[1]) + "] as [" + str(aux_name[1]) + "] "
+                                      "FROM (SELECT * FROM Auxiliary_Table WHERE [AuxCh_Type] = " + str(aux_type_expanded[0]) + " AND [AuxCh_ID] = " + str(aux_channel) + " AND [Date_Time] > " + str(start_date_time) + " AND [Date_Time] < " + str(end_date_time) + ") AS tbl "
+                                      "PIVOT (SUM(Data_Value) FOR Data_Type IN ([" + str(aux_type_expanded[0]) + "], [" + str(aux_type_expanded[1]) + "])) AS pvt ORDER BY [Date_Time_Aux]" )
+            
+                print (query)
+                print("------------------------------------------------")
                 aux_df = pd.read_sql( query, self.conn_data[db] )
             
                 df = pd.concat( [df, aux_df], axis=1 )
@@ -156,12 +167,12 @@ class ArbinDatabase( object ):
     # Utilities
     # --------------------------------------------------------------------------------------
     def get_aux_data_type( self, data_code ):
-        if data_code == "0": #Voltage and dV/dt
+        if data_code == "0":   # Voltage and dV/dt
             return [0,30]
-        elif data_code == "1": #Temperature and dT/dt
+        elif data_code == "1": # Temperature and dT/dt
             return [1,31]
         
-        val = int( data_code )
+        val = int( data_code ) # Other
         return [val]
 
 

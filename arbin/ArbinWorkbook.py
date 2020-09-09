@@ -24,10 +24,14 @@ class ArbinWorkbook( object ):
 
 
     def save_workbook( self, path ):
-        if( not os.path.isdir(path) ): os.makedirs(path)
-        self.wb.save( path + self.file_name )
+        path_norm = os.path.normpath( path )
+        file_norm = os.path.normpath( self.file_name )
+        
+        if( not os.path.isdir(path_norm) ):
+            os.makedirs(path_norm)
+        self.wb.save( os.path.join(path_norm, file_norm) )
+        
     
-  
     
     # --------------------------------------------------------------------------------------
     # Utilities
