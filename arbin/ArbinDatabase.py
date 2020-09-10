@@ -37,6 +37,19 @@ class ArbinDatabase( object ):
             except Exception as e:
                 print( "Could not connect to SQL Server, check the connection setting and try again." )
             
+            
+    # Check
+    # -----------------------------------------------------------------------------        
+    def check_last_datetime( self, testID ):
+        db_df = self.list_database_data_for( testID )
+        db = db_df[-1]
+        
+        query = ( "SELECT TOP 1 [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time] DESC" )
+        df = pd.read_sql( query, self.conn_data[db] )
+        time_raw = df.iloc[0,0]
+        return int( time_raw / 10000000 )
+    
+    
     # Return Python Lists
     # -----------------------------------------------------------------------------
     def list_database_data( self ):
@@ -138,7 +151,7 @@ class ArbinDatabase( object ):
                 aux_type_expanded = self.get_aux_data_type( aux_type )
                 aux_name = self.get_aux_column_name( aux_type_expanded, aux_channel )
             
-                # Handle 2 part auxiliary types
+                # Substrings for 2-part auxiliary types
                 query_sub_1 = ""
                 query_sub_2 = ""
                 if len(aux_type_expanded) == 2:
