@@ -9,28 +9,31 @@ import pandas as pd
 # 
 # ASSUMPTIONS
 # - A test will write to multiple databases in order.
-# - All info is in the Master Database.
+# - All info is in the Master Info database.
 #
 # =============================================================================
 
 
-# SQL Server Arbin Database Constants
+# Constants: SQL Server Arbin Database
 # -----------------------------------------------------------------------------
 DATABASE_MASTER = 'ArbinPro8MasterInfo'
 
 
 class ArbinDatabase( object ):
 
-    # Connections to SQL Server
+    # Class Initialization
     # -----------------------------------------------------------------------------
     def __init__( self, server, username, password ):
+        # SQL Server Connections
+        #   self.conn.master
+        #   self.conn.data[]
         try:
             self.conn_master = pyodbc.connect( 'DRIVER={ODBC Driver 17 for SQL Server}; SERVER='+server+'; DATABASE='+DATABASE_MASTER+'; UID='+username+'; PWD='+password )
         except Exception as e:
             print( "Could not connect to SQL Server, check the connection setting and try again." )
         
         self.conn_data = {}
-        databases = self.list_database_data()
+        databases = self.list_data_databases()
         for db_name in databases:
             try:
                 self.conn_data[db_name] = pyodbc.connect( 'DRIVER={ODBC Driver 17 for SQL Server}; SERVER='+server+'; DATABASE='+db_name+'; UID='+username+'; PWD='+password )
@@ -38,10 +41,10 @@ class ArbinDatabase( object ):
                 print( "Could not connect to SQL Server, check the connection setting and try again." )
             
             
-    # Check
+    # Single Values
     # -----------------------------------------------------------------------------        
-    def check_last_datetime( self, testID ):
-        db_df = self.list_database_data_for( testID )
+    def last_datetime_for( self, testID ):
+        db_df = self.list_data_databases_for( testID )
         db = db_df[-1]
         
         query = ( "SELECT TOP 1 [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time] DESC" )
@@ -50,15 +53,15 @@ class ArbinDatabase( object ):
         return int( time_raw / 10000000 )
     
     
-    # Return Python Lists
+    # Python Lists
     # -----------------------------------------------------------------------------
-    def list_database_data( self ):
+    def list_data_databases( self ):
         query = ( "SELECT [Database_Name] FROM DatabaseName_Table" )
         df = pd.read_sql( query, self.conn_master )
         return df['Database_Name'].tolist()
 
     
-    def list_database_data_for( self, testID ):
+    def list_data_databases_for( self, testID ):
         query = ( "SELECT [Databases] FROM TestIVChList_Table WHERE [Test_ID] = " + str(testID) )
         df = pd.read_sql( query, self.conn_master )
         return re.findall( '(\w+),', df.at[0, "Databases"] )
@@ -70,15 +73,14 @@ class ArbinDatabase( object ):
         return df['Test_ID'].tolist()
 
 
-    # Return Pandas DataFrames
+    # Pandas DataFrames
     # -----------------------------------------------------------------------------
-    def tests_all_detailed( self ):
+    def test_list_display( self ):
         query = ( "SELECT TestList_Table.Test_ID, TestList_Table.Test_Name, TestList_Table.First_Start_DateTime, "
                   "TestIVChList_Table.IV_Ch_ID, TestIVChList_Table.Schedule_File_Name "
                   "FROM TestList_Table INNER JOIN TestIVChList_Table ON TestList_Table.Test_ID = TestIVChList_Table.Test_ID" )
-
-        
         return pd.read_sql( query, self.conn_master )
+
     
     def test_list_for( self, testID ):
         query = ( "SELECT * FROM TestList_Table WHERE [Test_ID] = " + str(testID) )
@@ -93,7 +95,7 @@ class ArbinDatabase( object ):
     def data_basic( self, testID ):
         query = ( "SELECT * FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time]" )
         df_combined = pd.DataFrame()
-        databases = self.list_database_data_for( testID )
+        databases = self.list_data_databases_for( testID )
         for db in databases:
             df = pd.read_sql( query, self.conn_data[db] )
             df_combined = df_combined.append(df, ignore_index=True)
@@ -106,7 +108,7 @@ class ArbinDatabase( object ):
                        "FROM (SELECT * FROM IV_Extended_Table WHERE [Test_ID] = " + str(testID) + ") as tbl "
                        "PIVOT (SUM([Data_value]) FOR [Data_Type] IN ([6],[27],[30],[82],[83])) as pvt ORDER BY [Date_Time]" )
         df_combined = pd.DataFrame()
-        databases = self.list_database_data_for( testID )
+        databases = self.list_data_databases_for( testID )
         for db in databases:
             df = pd.read_sql( query, self.conn_data[db] )
             df_combined = df_combined.append(df, ignore_index=True)
@@ -117,7 +119,7 @@ class ArbinDatabase( object ):
     def data_statistic( self, testID ):
         query = ( "SELECT * FROM StatisticData_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time]" )
         df_combined = pd.DataFrame()
-        databases = self.list_database_data_for( testID )
+        databases = self.list_data_databases_for( testID )
         for db in databases:
             df = pd.read_sql( query, self.conn_data[db] )
             df_combined = df_combined.append(df, ignore_index=True)
@@ -127,31 +129,36 @@ class ArbinDatabase( object ):
         
     def data_auxiliary( self, testID ):
         # Get the aux map
+        # The aux map is a set of type & channel pairs, that specify the type of aux data
+        #    collected on which channel number.
         query = ( "SELECT [Aux_Map] FROM TestIVChList_Table WHERE [Test_ID] = " + str(testID) )
         df = pd.read_sql( query, self.conn_master )
         auxiliary_map = df.at[0, "Aux_Map"]
-        auxiliary_type_channel_pair = re.findall( '([0-9]+)\^([0-9]+)', auxiliary_map )
+        auxiliary_type_channel_pairs = re.findall( '([0-9]+)\^([0-9]+)', auxiliary_map )
         
+        # Query each data database
         df_combined = pd.DataFrame()
-        databases = self.list_database_data_for( testID )
+        databases = self.list_data_databases_for( testID )
         for db in databases:
         
-            # Get start and end times
+            # Get start and end times of the test
             query = ( "SELECT [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) )
             df = pd.read_sql( query, self.conn_data[db] )
             start_date_time = df.at[0, "Date_Time"]
             end_date_time = df.at[df.index[-1], "Date_Time"]
         
+            # Query for the aux data
             df = pd.DataFrame()
-        
-            for pair in auxiliary_type_channel_pair:
+            for pair in auxiliary_type_channel_pairs:
                 aux_type = pair[0]
                 aux_channel = pair[1]
-            
+                
+                # Expand the aux type because codes 0 & 1 each map to two other data types
+                # The aux name is for human readable output
                 aux_type_expanded = self.get_aux_data_type( aux_type )
                 aux_name = self.get_aux_column_name( aux_type_expanded, aux_channel )
             
-                # Substrings for 2-part auxiliary types
+                # Substrings for 2-part auxiliary types (to keep query more human readable)
                 query_sub_1 = ""
                 query_sub_2 = ""
                 if len(aux_type_expanded) == 2:
@@ -163,14 +170,17 @@ class ArbinDatabase( object ):
                           "PIVOT (SUM(Data_Value) FOR Data_Type IN ([" + str(aux_type_expanded[0]) + "]" + query_sub_2 + ")) AS pvt ORDER BY [Date_Time_Aux]" )
 
                 aux_df = pd.read_sql( query, self.conn_data[db] )
-            
+
+                # Merge each type of aux data into one dataframe
                 df = pd.concat( [df, aux_df], axis=1 )
                 df = df.drop( columns=['Date_Time_Aux'] )
         
+            # Merge across data databases
             df_combined = df_combined.append(df, ignore_index=True)
             
         return df_combined
         
+   
         
     # --------------------------------------------------------------------------------------
     # Utilities

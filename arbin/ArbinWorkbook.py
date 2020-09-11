@@ -13,6 +13,8 @@ import openpyxl
 
 class ArbinWorkbook( object ):
 
+    # Class Initialization
+    # -----------------------------------------------------------------------------
     def __init__( self, file_name ):
         self.file_name = file_name + ".xlsx"
         
@@ -63,5 +65,3 @@ class ArbinWorkbook( object ):
                     dims[cell.column_letter] = max( (dims.get(cell.column_letter, 0), len(str(cell.value))) ) 
         for col, value in dims.items():
             worksheet.column_dimensions[col].width = value
-
-    

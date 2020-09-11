@@ -18,19 +18,21 @@ from arbin.ArbinWorkbook import ArbinWorkbook
 #
 # =============================================================================
 
-# Constants
+# Constants: Excel
 # -----------------------------------------------------------------------------
 MAXDATAPOINTS = 900000
 
 
 class ArbinExport( object ):
 
+    # Class Initialization
+    # -----------------------------------------------------------------------------
     def __init__( self, arbinTestItem ):
         self.arbinTestItem = arbinTestItem
         self.wb_list = []
         
         # Excel has a maximum of 1,000,000 rows
-        wb_count = math.ceil( arbinTestItem.raw_data_count() / MAXDATAPOINTS )
+        wb_count = math.ceil( arbinTestItem.count_raw_data() / MAXDATAPOINTS )
         
         for wb_num in range(wb_count):
             file_name = arbinTestItem.test_name

@@ -20,6 +20,8 @@ TIMEZONE = "America/New_York"
 
 class ArbinTestItem( object ):
     
+    # Class Initialization
+    # -----------------------------------------------------------------------------
     def __init__( self, testID, arbin_database ):
         self.testID = testID
         self.arbin_database = arbin_database
@@ -38,13 +40,17 @@ class ArbinTestItem( object ):
         self.cycle_statistics_df = self.convert_date_time( self.cycle_statistics_df, 'Date_Time', 'ns', 100 )
 
    
+    # Properties
+    # -----------------------------------------------------------------------------
     def test_name( self ):
         test_list_df = self.arbin_database.test_list_for( self.testID )
         return test_list_df.at[0,'Test_Name']
     
+    
     def device_id( self ):
         test_list_df = self.arbin_database.test_list_for( self.testID )
         return test_list_df.at[0,'Device_ID']
+    
     
     def has_auxiliary( self ):
         test_channel_list_df = self.arbin_database.test_channel_list( self.testID )
@@ -52,14 +58,10 @@ class ArbinTestItem( object ):
         if( test_channel_list_df.at[0, 'Log_Aux_Data_Flag'] == 1):
             return True
         return False
-
     
-    
-    # THIS NEEDS UPDATING FROM ???  MAYBE NOT MULTIPLE DATABASES HANDLGED?
-    def raw_data_count( self ):
-        return self.raw_data_df['Data_Point'].count()
-        
 
+    # Dataframes
+    # -----------------------------------------------------------------------------
     def get_global_info( self ):
         test_channel_list_df = self.arbin_database.test_channel_list( self.testID )
         test_list_df = self.arbin_database.test_list_for( self.testID )
@@ -88,7 +90,6 @@ class ArbinTestItem( object ):
         
         
     def get_raw_data( self ):
-
         data_basic_df = self.arbin_database.data_basic( self.testID )
         data_extended_df = self.arbin_database.data_extended( self.testID )
         merged_df = pd.merge( data_basic_df, data_extended_df, on='Date_Time', how='outer' )
@@ -123,6 +124,10 @@ class ArbinTestItem( object ):
             rows_list.append( dict_values )
             
         return pd.DataFrame( rows_list )
+
+
+    def count_raw_data( self ):
+        return self.raw_data_df['Data_Point'].count()
 
 
     def get_cycle_statistics( self ):
@@ -168,7 +173,6 @@ class ArbinTestItem( object ):
     # --------------------------------------------------------------------------------------
     # Utilities
     # --------------------------------------------------------------------------------------
-    # HOPEFULLY I DIDN'T BREAK THIS TURNING IT INTO A STATICMETHOD
     @staticmethod
     def convert_date_time( df, column_name, unit, multiplier ):
         df[column_name] = df[column_name].apply( lambda x: x * multiplier )
