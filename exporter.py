@@ -5,7 +5,7 @@ import argparse
 import pyodbc
 import pandas as pd
 from arbin.ArbinDatabase import ArbinDatabase
-from arbin.ArbinTestItem import ArbinTestItem
+from arbin.ArbinTest import ArbinTest
 from arbin.ArbinExport import ArbinExport
 
 # =============================================================================
@@ -84,7 +84,7 @@ if not len(sys.argv) > 1:
 # -----------------------------------------------------------------------------
 if args.list:
     list_df = arbinDatabase.test_list_display()
-    df = ArbinTestItem.convert_date_time( list_df, 'First_Start_DateTime', 's', 1 )
+    df = ArbinTest.convert_date_time( list_df, 'First_Start_DateTime', 's', 1 )
     print( df.sort_values('Test_ID').to_string(index=False) )
     exit()
 
@@ -128,7 +128,7 @@ else:
 for test_id in tests:
     # Process Test
     print( "Processing Test ID: " + str(test_id) )
-    arbinTest = ArbinTestItem( test_id, arbinDatabase )
+    arbinTest = ArbinTest( test_id, arbinDatabase )
     
     # Export
     arbinExport = ArbinExport( arbinTest )

@@ -5,7 +5,7 @@ import pyodbc
 import pandas as pd
 import openpyxl
 import openpyxl.utils.dataframe
-from arbin.ArbinTestItem import ArbinTestItem
+from arbin.ArbinTest import ArbinTest
 from arbin.ArbinWorkbook import ArbinWorkbook
 
 # =============================================================================
@@ -27,15 +27,15 @@ class ArbinExport( object ):
 
     # Class Initialization
     # -----------------------------------------------------------------------------
-    def __init__( self, arbinTestItem ):
-        self.arbinTestItem = arbinTestItem
+    def __init__( self, ArbinTest ):
+        self.ArbinTest = ArbinTest
         self.wb_list = []
         
         # Excel has a maximum of 1,000,000 rows
-        wb_count = math.ceil( arbinTestItem.count_raw_data() / MAXDATAPOINTS )
+        wb_count = math.ceil( ArbinTest.count_raw_data() / MAXDATAPOINTS )
         
         for wb_num in range(wb_count):
-            file_name = arbinTestItem.test_name
+            file_name = ArbinTest.test_name
             if wb_num > 0:
                 file_name = file_name + "_" + str(wb_num+1)
             
@@ -54,8 +54,8 @@ class ArbinExport( object ):
     
 
     def export_global_info_sheet( self, worksheet ):
-        test_name = self.arbinTestItem.test_name
-        arbin_number = self.arbinTestItem.arbin_number
+        test_name = self.ArbinTest.test_name
+        arbin_number = self.ArbinTest.arbin_number
         current_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
             
         #worksheet.append(['','','','TEST REPORT','Processed by exporter.py'])
@@ -63,7 +63,7 @@ class ArbinExport( object ):
         worksheet.append(['','','Test Name',test_name,'Serial Number'])
         worksheet.append(['','','Export Time',current_date,arbin_number])
         
-        df = self.arbinTestItem.global_info_df
+        df = self.ArbinTest.global_info_df
         
         for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
             worksheet.append( row )
@@ -84,7 +84,7 @@ class ArbinExport( object ):
         datapoint_start = wb_num * MAXDATAPOINTS
         datapoint_end = datapoint_start + MAXDATAPOINTS
     
-        df = self.arbinTestItem.raw_data_df.iloc[datapoint_start:datapoint_end]
+        df = self.ArbinTest.raw_data_df.iloc[datapoint_start:datapoint_end]
         
         for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
             worksheet.append( row )
@@ -96,7 +96,7 @@ class ArbinExport( object ):
 
     
     def export_statistics_sheet( self, worksheet ):
-        df = self.arbinTestItem.cycle_statistics_df
+        df = self.ArbinTest.cycle_statistics_df
         
         for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
             worksheet.append( row )

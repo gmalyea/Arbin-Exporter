@@ -3,7 +3,7 @@ import pandas as pd
 from arbin.ArbinDatabase import ArbinDatabase
 
 # =============================================================================
-# ArbinTestItem
+# ArbinTest
 # -----------------------------------------------------------------------------
 # 
 # Notes:
@@ -18,7 +18,7 @@ from arbin.ArbinDatabase import ArbinDatabase
 TIMEZONE = -5 # Hours
 
 
-class ArbinTestItem( object ):
+class ArbinTest( object ):
     
     # Class Initialization
     # -----------------------------------------------------------------------------
