@@ -15,7 +15,7 @@ from arbin.ArbinDatabase import ArbinDatabase
 
 # Constants
 # -----------------------------------------------------------------------------
-TIMEZONE = "America/New_York"
+TIMEZONE = -5 # Hours
 
 
 class ArbinTestItem( object ):
@@ -27,7 +27,7 @@ class ArbinTestItem( object ):
         self.arbin_database = arbin_database
         
         self.test_name = self.test_name()
-        self.device_id = self.device_id()
+        self.arbin_number = self.arbin_number()
         self.has_auxiliary = self.has_auxiliary()
 
         self.global_info_df = self.get_global_info()
@@ -45,6 +45,11 @@ class ArbinTestItem( object ):
     def test_name( self ):
         test_list_df = self.arbin_database.test_list_for( self.testID )
         return test_list_df.at[0,'Test_Name']
+        
+    
+    def arbin_number( self ):
+        device_id = self.device_id()
+        return self.arbin_database.arbin_number_for( device_id )
     
     
     def device_id( self ):
@@ -177,7 +182,10 @@ class ArbinTestItem( object ):
     def convert_date_time( df, column_name, unit, multiplier ):
         df[column_name] = df[column_name].apply( lambda x: x * multiplier )
         df[column_name] = pd.to_datetime(df[column_name], unit=unit, errors = 'coerce' )
-        df[column_name] = pd.DatetimeIndex(df[column_name]).tz_localize('UTC').tz_convert(TIMEZONE).strftime('%Y-%m-%d %H:%M:%S.%f')
+        # Offset for timezone
+        df[column_name] = df[column_name] + pd.DateOffset(hours=TIMEZONE)
+        
+        #df[column_name] = pd.DatetimeIndex(df[column_name]).strftime('%Y-%m-%d %H:%M:%S.%f')
         
         return df
     

@@ -23,16 +23,21 @@ from arbin.ArbinExport import ArbinExport
 # >python exporter.py Test_ID1 Test_ID2 Test_ID3 etc...
 #
 #
+# Dependencies
+# -----------------------------------------------------------------------------
+# > pip install pandas
+# > pip install pyodbc
+# > pip install openpyxl
+#
 #
 # Issues
 # -----------------------------------------------------------------------------
-# - Timezone: is time off by 1 hour? - Arbin doesn't observe daylight savings.  fixed 5 hours?
-# - Test #50 - missing last row of Aux data.  Bug?  Drop row?
-# - Argparse - description & epilog
-# - Should the test_list be a set instead?  Faster?
+# - why do the query strings have parenthesis?
 #
 # QUESTIONS
 # - If two test have same name, overwrite? - concatenate tests
+# - Arbin Sample DB has testIDs unique by channel
+# - Is Date_Time supposed to be fixed?  In Arbin script output it doesn't change
 # =============================================================================
 
 
@@ -55,8 +60,7 @@ PASSWORD = 'Garret2020'
 #  https://docs.python.org/3.3/library/argparse.html
 #  https://docs.python.org/3/howto/argparse.html
 # -----------------------------------------------------------------------------
-parser = argparse.ArgumentParser( description="Exports Arbin data as Excel files.",
-                                       epilog="And that's how you'd foo a bar" )
+parser = argparse.ArgumentParser( description="Exports Arbin data as Excel files." )
 parser.add_argument( 'tests', nargs='*', type=int, help="list of specific Test_IDs to process" )
 parser.add_argument( '-a', '--all', action='store_true', help="force output of all tests" )
 parser.add_argument( '-l', '--list', action='store_true', help="display a list of all tests" )

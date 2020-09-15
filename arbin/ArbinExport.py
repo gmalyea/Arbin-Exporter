@@ -55,12 +55,13 @@ class ArbinExport( object ):
 
     def export_global_info_sheet( self, worksheet ):
         test_name = self.arbinTestItem.test_name
-        device_id = self.arbinTestItem.device_id
+        arbin_number = self.arbinTestItem.arbin_number
         current_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
             
-        worksheet.append(['','','','TEST REPORT','Processed by: exporter.py'])
+        #worksheet.append(['','','','TEST REPORT','Processed by exporter.py'])
+        worksheet.append(['Processed by exporter.py','','','TEST REPORT'])
         worksheet.append(['','','Test Name',test_name,'Serial Number'])
-        worksheet.append(['','','Export Time',current_date,device_id])
+        worksheet.append(['','','Export Time',current_date,arbin_number])
         
         df = self.arbinTestItem.global_info_df
         
@@ -72,8 +73,10 @@ class ArbinExport( object ):
         ArbinWorkbook.border_bottom( worksheet, 3 )
         ArbinWorkbook.justify_right( worksheet, 'C2' )
         ArbinWorkbook.justify_right( worksheet, 'C3' )
-        ArbinWorkbook.justify_right( worksheet, 'D2' )
-        ArbinWorkbook.justify_right( worksheet, 'D3' )
+        ArbinWorkbook.justify_left( worksheet, 'D2' )
+        ArbinWorkbook.justify_left( worksheet, 'D3' )
+        ArbinWorkbook.justify_right( worksheet, 'E2' )
+        ArbinWorkbook.justify_right( worksheet, 'E3' )
         ArbinWorkbook.resize_cells( worksheet, slice(1,5) )
              
 
