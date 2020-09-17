@@ -6,8 +6,13 @@ import pandas as pd
 # =============================================================================
 # ArbinDatabase
 # -----------------------------------------------------------------------------
-# 
+# On initialization the following SQL Server connections are made:
+#   self.conn.master        (ArbinPro8MasterInfo)
+#   self.conn.data[]        (ArbinPro8Data_1, 2, etc)
+#
+#
 # ASSUMPTIONS
+# -----------------------------------------------------------------------------
 # - A test will write to multiple databases in order.
 # - All info is in the Master Info database.
 #
@@ -25,8 +30,6 @@ class ArbinDatabase( object ):
     # -----------------------------------------------------------------------------
     def __init__( self, server, username, password ):
         # SQL Server Connections
-        #   self.conn.master
-        #   self.conn.data[]
         try:
             self.conn_master = pyodbc.connect( 'DRIVER={ODBC Driver 17 for SQL Server}; SERVER='+server+'; DATABASE='+DATABASE_MASTER+'; UID='+username+'; PWD='+password )
         except Exception as e:
@@ -47,14 +50,14 @@ class ArbinDatabase( object ):
         db_df = self.list_data_databases_for( testID )
         db = db_df[-1]
         
-        query = ( "SELECT TOP 1 [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time] DESC" )
+        query = "SELECT TOP 1 [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time] DESC"
         df = pd.read_sql( query, self.conn_data[db] )
         time_raw = df.iloc[0,0]
         return int( time_raw / 10000000 )
         
         
     def arbin_number_for( self, deviceID ):        
-        query = ( "SELECT [Arbin_Number] FROM Device_Table WHERE [Device_ID] = " + str(deviceID) )
+        query = "SELECT [Arbin_Number] FROM Device_Table WHERE [Device_ID] = " + str(deviceID)
         df = pd.read_sql( query, self.conn_master )
         return df.at[0,'Arbin_Number']
     
@@ -62,13 +65,13 @@ class ArbinDatabase( object ):
     # Python Lists
     # -----------------------------------------------------------------------------
     def list_data_databases( self ):
-        query = ( "SELECT [Database_Name] FROM DatabaseName_Table" )
+        query = "SELECT [Database_Name] FROM DatabaseName_Table"
         df = pd.read_sql( query, self.conn_master )
         return df['Database_Name'].tolist()
 
     
     def list_data_databases_for( self, testID ):
-        query = ( "SELECT [Databases] FROM TestIVChList_Table WHERE [Test_ID] = " + str(testID) )
+        query = "SELECT [Databases] FROM TestIVChList_Table WHERE [Test_ID] = " + str(testID)
         df = pd.read_sql( query, self.conn_master )
         return re.findall( '(\w+),', df.at[0, "Databases"] )
 
