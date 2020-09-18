@@ -50,14 +50,14 @@ class ArbinDatabase( object ):
         db_df = self.list_data_databases_for( testID )
         db = db_df[-1]
         
-        query = "SELECT TOP 1 [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time] DESC"
+        query = ( "SELECT TOP 1 [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time] DESC" )
         df = pd.read_sql( query, self.conn_data[db] )
         time_raw = df.iloc[0,0]
         return int( time_raw / 10000000 )
         
         
     def arbin_number_for( self, deviceID ):        
-        query = "SELECT [Arbin_Number] FROM Device_Table WHERE [Device_ID] = " + str(deviceID)
+        query = ( "SELECT [Arbin_Number] FROM Device_Table WHERE [Device_ID] = " + str(deviceID) )
         df = pd.read_sql( query, self.conn_master )
         return df.at[0,'Arbin_Number']
     
@@ -65,13 +65,13 @@ class ArbinDatabase( object ):
     # Python Lists
     # -----------------------------------------------------------------------------
     def list_data_databases( self ):
-        query = "SELECT [Database_Name] FROM DatabaseName_Table"
+        query = ( "SELECT [Database_Name] FROM DatabaseName_Table" )
         df = pd.read_sql( query, self.conn_master )
         return df['Database_Name'].tolist()
 
     
     def list_data_databases_for( self, testID ):
-        query = "SELECT [Databases] FROM TestIVChList_Table WHERE [Test_ID] = " + str(testID)
+        query = ( "SELECT [Databases] FROM TestIVChList_Table WHERE [Test_ID] = " + str(testID) )
         df = pd.read_sql( query, self.conn_master )
         return re.findall( '(\w+),', df.at[0, "Databases"] )
 
@@ -86,8 +86,8 @@ class ArbinDatabase( object ):
     # -----------------------------------------------------------------------------
     def test_list_display( self ):
         query = ( "SELECT TestList_Table.Test_ID, TestList_Table.Test_Name, TestList_Table.First_Start_DateTime, "
-                  "TestIVChList_Table.IV_Ch_ID, TestIVChList_Table.Schedule_File_Name "
-                  "FROM TestList_Table INNER JOIN TestIVChList_Table ON TestList_Table.Test_ID = TestIVChList_Table.Test_ID" )
+                    "TestIVChList_Table.IV_Ch_ID, TestIVChList_Table.Schedule_File_Name "
+                    "FROM TestList_Table INNER JOIN TestIVChList_Table ON TestList_Table.Test_ID = TestIVChList_Table.Test_ID" )
         return pd.read_sql( query, self.conn_master )
 
     
@@ -102,7 +102,8 @@ class ArbinDatabase( object ):
         
 
     def data_basic( self, testID ):
-        query = ( "SELECT * FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time]" )
+        #query = ( "SELECT * FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time]" )
+        query = ( "SELECT [Data_Point], [Date_Time], [Test_Time], [Step_Time], [Cycle_ID], [Step_ID], [Current], [Voltage], [Charge_Capacity], [Discharge_Capacity], [Charge_Energy], [Discharge_Energy] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time]" )
         df_combined = pd.DataFrame()
         databases = self.list_data_databases_for( testID )
         for db in databases:
@@ -110,12 +111,17 @@ class ArbinDatabase( object ):
             df_combined = df_combined.append(df, ignore_index=True)
         
         return df_combined
+        
+
+        
+        
+        
     
     
     def data_extended( self, testID ):
         query = ( "SELECT [Date_Time], [6] as [ACR], [27] as [dV/dt],[30] as [Internal_Resistance], [82] as [dQ/dV], [83] as [dV/dQ] "
-                       "FROM (SELECT * FROM IV_Extended_Table WHERE [Test_ID] = " + str(testID) + ") as tbl "
-                       "PIVOT (SUM([Data_value]) FOR [Data_Type] IN ([6],[27],[30],[82],[83])) as pvt ORDER BY [Date_Time]" )
+                    "FROM (SELECT * FROM IV_Extended_Table WHERE [Test_ID] = " + str(testID) + ") as tbl "
+                    "PIVOT (SUM([Data_value]) FOR [Data_Type] IN ([6],[27],[30],[82],[83])) as pvt ORDER BY [Date_Time]" )
         df_combined = pd.DataFrame()
         databases = self.list_data_databases_for( testID )
         for db in databases:
@@ -151,12 +157,12 @@ class ArbinDatabase( object ):
         for db in databases:
             
             # Start Time
-            query = "SELECT TOP 1 [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time]"
+            query = ( "SELECT TOP 1 [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time]" )
             df = pd.read_sql( query, self.conn_data[db] )
             start_date_time = df.at[0, "Date_Time"]
             
             # End Time
-            query = "SELECT TOP 1 [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time] DESC"
+            query = ( "SELECT TOP 1 [Date_Time] FROM IV_Basic_Table WHERE [Test_ID] = " + str(testID) + " ORDER BY [Date_Time] DESC" )
             df = pd.read_sql( query, self.conn_data[db] )
             end_date_time = df.at[0, "Date_Time"]
         
@@ -179,14 +185,17 @@ class ArbinDatabase( object ):
                     query_sub_2 = ", [" + str(aux_type_expanded[1]) + "] "
                 
                 query = ( "SELECT [Date_Time] as [Date_Time_Aux], [" + str(aux_type_expanded[0]) + "] as [" + str(aux_name[0]) + "] " + query_sub_1 +
-                          "FROM (SELECT * FROM Auxiliary_Table WHERE [AuxCh_Type] = " + str(aux_type_expanded[0]) + " AND [AuxCh_ID] = " + str(aux_channel) + " AND [Date_Time] > " + str(start_date_time) + " AND [Date_Time] < " + str(end_date_time) + ") AS tbl "
-                          "PIVOT (SUM(Data_Value) FOR Data_Type IN ([" + str(aux_type_expanded[0]) + "]" + query_sub_2 + ")) AS pvt ORDER BY [Date_Time_Aux]" )
+                            "FROM (SELECT * FROM Auxiliary_Table WHERE [AuxCh_Type] = " + str(aux_type_expanded[0]) + " AND [AuxCh_ID] = " + str(aux_channel) + " AND [Date_Time] > " + str(start_date_time) + " AND [Date_Time] < " + str(end_date_time) + ") AS tbl "
+                            "PIVOT (SUM(Data_Value) FOR Data_Type IN ([" + str(aux_type_expanded[0]) + "]" + query_sub_2 + ")) AS pvt ORDER BY [Date_Time_Aux]" )
                 
                 aux_df = pd.read_sql( query, self.conn_data[db] )
                 
                 # Merge each type of aux data into one dataframe
                 df = pd.concat( [df, aux_df], axis=1 )
-                df = df.drop( columns=['Date_Time_Aux'] )
+                
+                # Remove duplicate 'Date_Time_Aux' columns
+                df = df.loc[:,~df.columns.duplicated()]
+                #df = df.drop( columns=['Date_Time_Aux'] )
         
             # Merge across data databases
             df_combined = df_combined.append(df, ignore_index=True)

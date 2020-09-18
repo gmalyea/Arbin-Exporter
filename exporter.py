@@ -32,12 +32,9 @@ from arbin.ArbinExport import ArbinExport
 #
 # Issues
 # -----------------------------------------------------------------------------
-# - why do the query strings have parenthesis?
 #
 # QUESTIONS
 # - If two test have same name, overwrite? - concatenate tests
-# - Arbin Sample DB has testIDs unique by channel
-# - Is Date_Time supposed to be fixed?  In Arbin script output it doesn't change
 # =============================================================================
 
 

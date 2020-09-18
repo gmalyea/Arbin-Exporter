@@ -31,14 +31,18 @@ class ArbinTest( object ):
         self.has_auxiliary = self.has_auxiliary()
 
         self.global_info_df = self.get_global_info()
-        self.raw_data_df = self.get_raw_data()
+        self.basic_extended_data_df = self.get_basic_extended_data()
+        self.aux_data_df = self.get_aux_data()
         self.cycle_statistics_df = self.get_cycle_statistics()
-
+        
+        self.raw_data_df = self.merge_raw_data()
+        
         # Change Timezone
-        self.global_info_df = self.convert_date_time( self.global_info_df, 'Start DateTime', 's', 1 )
-        self.raw_data_df = self.convert_date_time( self.raw_data_df, 'Date_Time', 'ns', 100 )
-        self.cycle_statistics_df = self.convert_date_time( self.cycle_statistics_df, 'Date_Time', 'ns', 100 )
-
+        #self.global_info_df = self.convert_date_time( self.global_info_df, 'Start DateTime', 's', 1 )
+        #self.raw_data_df = self.convert_date_time( self.raw_data_df, 'Date_Time', 'ns', 100 )
+        #self.cycle_statistics_df = self.convert_date_time( self.cycle_statistics_df, 'Date_Time', 'ns', 100 )
+        #self.raw_aux_data_df = self.convert_date_time( self.raw_aux_data_df, 'Date_Time', 'ns', 100 )
+        
    
     # Properties
     # -----------------------------------------------------------------------------
@@ -94,43 +98,74 @@ class ArbinTest( object ):
         return pd.DataFrame( rows_list )   
         
         
-    def get_raw_data( self ):
+    def get_basic_extended_data( self ):
         data_basic_df = self.arbin_database.data_basic( self.testID )
         data_extended_df = self.arbin_database.data_extended( self.testID )
         merged_df = pd.merge( data_basic_df, data_extended_df, on='Date_Time', how='outer' )
         
-        data_auxiliary_df = self.arbin_database.data_auxiliary( self.testID )
-        merged_df = pd.concat( [merged_df, data_auxiliary_df], axis=1 )
+        #data_auxiliary_df = self.arbin_database.data_auxiliary( self.testID )
+        #merged_df = pd.concat( [merged_df, data_auxiliary_df], axis=1 )
         
-        rows_list = []
-        for index, row in merged_df.iterrows():
-            dict_values = {         'Data_Point': row['Data_Point'],
-                                     'Date_Time': row['Date_Time'],
-                                 'Test_Times (s)': row['Test_Time'],
-                                 'Step_Times (s)': row['Step_Time'],
-                                   'Cycle_Index': row['Cycle_ID'],
-                                    'Step_Index': row['Step_ID'],
-                                    'Current (A)': row['Current'],
-                                    'Voltage (V)': row['Voltage'],
-                                      'Power (W)': '', # Calculated Value
-                           'Charge_Capacity (Ah)': row['Charge_Capacity'],
-                        'Discharge_Capacity (Ah)': row['Discharge_Capacity'],
-                             'Charge_Energy (Wh)': row['Charge_Energy'],
-                          'Discharge_Energy (Wh)': row['Discharge_Energy'],
-                                      'ACR (Ohm)': row['ACR'],
-                                    'dV/dt (V/s)': row['dV/dt'],
-                      'Internal_Resistance (Ohm)': row['Internal_Resistance'],
-                                   'dQ/dV (Ah/V)': row['dQ/dV'],
-                                   'dV/dQ (V/Ah)': row['dV/dQ'] }
-            
-            for column in list( data_auxiliary_df.columns ):
-                dict_values[column] = row[column]
-            
-            rows_list.append( dict_values )
-            
-        return pd.DataFrame( rows_list )
+        #rows_list = []
+        #for index, row in merged_df.iterrows():
+        #    dict_values = {         'Data_Point': row['Data_Point'],
+        #                             'Date_Time': row['Date_Time'],
+        #                         'Test_Times (s)': row['Test_Time'],
+        #                         'Step_Times (s)': row['Step_Time'],
+        #                           'Cycle_Index': row['Cycle_ID'],
+        #                            'Step_Index': row['Step_ID'],
+        #                            'Current (A)': row['Current'],
+        #                            'Voltage (V)': row['Voltage'],
+        #                              'Power (W)': '', # Calculated Value
+        #                   'Charge_Capacity (Ah)': row['Charge_Capacity'],
+        #                'Discharge_Capacity (Ah)': row['Discharge_Capacity'],
+        #                     'Charge_Energy (Wh)': row['Charge_Energy'],
+        #                  'Discharge_Energy (Wh)': row['Discharge_Energy'],
+        #                              'ACR (Ohm)': row['ACR'],
+        #                            'dV/dt (V/s)': row['dV/dt'],
+        #              'Internal_Resistance (Ohm)': row['Internal_Resistance'],
+        #                           'dQ/dV (Ah/V)': row['dQ/dV'],
+        #                           'dV/dQ (V/Ah)': row['dV/dQ'] }
+        #    
+        #    #for column in list( data_auxiliary_df.columns ):
+        #        #dict_values[column] = row[column]
+        #    
+        #    rows_list.append( dict_values )
+        #    
+        #    return pd.DataFrame( rows_list )
+        
+        merged_df.rename(columns={  'Data_Point':'Data_Point',
+                                     'Date_Time':'Date_Time',
+                                     'Test_Time':'Test_Times (s)',
+                                     'Step_Time':'Step_Times (s)',
+                                      'Cycle_ID':'Cycle_Index',
+                                       'Step_ID':'Step_Index',
+                                       'Current':'Current (A)',
+                                       'Voltage':'Voltage (V)',
+                               'Charge_Capacity':'Charge_Capacity (Ah)',
+                            'Discharge_Capacity':'Discharge_Capacity (Ah)',
+                                 'Charge_Energy':'Charge_Energy (Wh)',
+                              'Discharge_Energy':'Discharge_Energy (Wh)',
+                                           'ACR':'ACR (Ohm)',
+                                         'dV/dt':'dV/dt (V/s)',
+                           'Internal_Resistance':'Internal_Resistance (Ohm)',
+                                         'dQ/dV':'dQ/dV (Ah/V)',
+                                         'dV/dQ':'dV/dQ (V/Ah)' }, inplace=True)
+        
+        return merged_df
 
 
+    def get_aux_data( self ):
+        data_auxiliary_df = self.arbin_database.data_auxiliary( self.testID )
+        return data_auxiliary_df
+        
+    def merge_raw_data( self ):
+        merged_df = pd.concat( [self.basic_extended_data_df, self.aux_data_df], axis=1 )
+        #merged_df = pd.merge( self.raw_data_df, self.aux_data_df, how='inner', left_index=True, right_index=True)
+        #merged_df = merged_df.drop( columns=['Date_Time_Aux'] )
+        return merged_df
+    
+    
     def count_raw_data( self ):
         return self.raw_data_df['Data_Point'].count()
 
@@ -184,8 +219,8 @@ class ArbinTest( object ):
         df[column_name] = pd.to_datetime(df[column_name], unit=unit, errors = 'coerce' )
         # Offset for timezone
         df[column_name] = df[column_name] + pd.DateOffset(hours=TIMEZONE)
-        
-        #df[column_name] = pd.DatetimeIndex(df[column_name]).strftime('%Y-%m-%d %H:%M:%S.%f')
+        # Change to string to keep precision when going to Excel
+        df[column_name] = pd.DatetimeIndex(df[column_name]).strftime('%Y-%m-%d %H:%M:%S.%f')
         
         return df
     
