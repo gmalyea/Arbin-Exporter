@@ -107,8 +107,9 @@ class ArbinExport( object ):
 
 
     def export_aux_sheet( self, worksheet ):        
-        df = self.convert_date_time( self.ArbinTest.raw_data_df, 'Date_Time', 'ns', 100 )
-        df = self.convert_date_time( df, 'Date_Time_Aux', 'ns', 100 )
+        #df = self.convert_date_time( self.ArbinTest.raw_data_df, 'Date_Time', 'ns', 100 )
+        #df = self.convert_date_time( df, 'Date_Time_Aux', 'ns', 100 )
+        df = self.ArbinTest.raw_data_df
         
         for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
             worksheet.append( row )

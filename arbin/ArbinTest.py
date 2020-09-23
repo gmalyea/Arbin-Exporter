@@ -31,11 +31,9 @@ class ArbinTest( object ):
         self.has_auxiliary = self.has_auxiliary()
 
         self.global_info_df = self.get_global_info()
-        self.basic_extended_data_df = self.get_basic_extended_data()
-        self.aux_data_df = self.get_aux_data()
+        self.raw_data_df = self.get_raw_data()
         self.cycle_statistics_df = self.get_cycle_statistics()
         
-        self.raw_data_df = self.merge_raw_data()
         
         # Change Timezone
         #self.global_info_df = self.convert_date_time( self.global_info_df, 'Start DateTime', 's', 1 )
@@ -98,12 +96,41 @@ class ArbinTest( object ):
         return pd.DataFrame( rows_list )   
         
         
-    def get_basic_extended_data( self ):
+    def get_raw_data( self ):
         data_basic_df = self.arbin_database.data_basic( self.testID )
         data_extended_df = self.arbin_database.data_extended( self.testID )
         merged_df = pd.merge( data_basic_df, data_extended_df, on='Date_Time', how='outer' )
         
-        #data_auxiliary_df = self.arbin_database.data_auxiliary( self.testID )
+        data_auxiliary_df = self.arbin_database.data_auxiliary( self.testID )
+        
+        # Lineup basic and auxiliary date_times
+        #offset = 0
+        #num_aux = data_auxiliary_df['Date_Time_Aux'].count()
+        #num_merged = merged_df['Date_Time'].count()
+#
+        #for index, row in merged_df.iterrows():
+        #    #if( index < num_aux ):
+        #    aux_time = data_auxiliary_df.loc[index-offset, 'Date_Time_Aux']
+        #    be_time = row['Date_Time']
+        #    
+        #    if( aux_time > be_time ):
+        #        data_auxiliary_df.loc[index-offset+0.5] = data_auxiliary_df.iloc[index-offset]
+        #        offset += 1
+#
+        #data_auxiliary_df = data_auxiliary_df.sort_index()
+        #data_auxiliary_df = data_auxiliary_df.reset_index(drop=True) 
+        ##merged_df = merged_df.drop( columns=['Date_Time_Aux'] )
+        
+        
+        merged_df = pd.concat( [merged_df, data_auxiliary_df], axis=1 )
+        return merged_df
+        
+        
+        
+        
+        
+        
+        
         #merged_df = pd.concat( [merged_df, data_auxiliary_df], axis=1 )
         
         #rows_list = []
@@ -134,37 +161,51 @@ class ArbinTest( object ):
         #    
         #    return pd.DataFrame( rows_list )
         
-        merged_df.rename(columns={  'Data_Point':'Data_Point',
-                                     'Date_Time':'Date_Time',
-                                     'Test_Time':'Test_Times (s)',
-                                     'Step_Time':'Step_Times (s)',
-                                      'Cycle_ID':'Cycle_Index',
-                                       'Step_ID':'Step_Index',
-                                       'Current':'Current (A)',
-                                       'Voltage':'Voltage (V)',
-                               'Charge_Capacity':'Charge_Capacity (Ah)',
-                            'Discharge_Capacity':'Discharge_Capacity (Ah)',
-                                 'Charge_Energy':'Charge_Energy (Wh)',
-                              'Discharge_Energy':'Discharge_Energy (Wh)',
-                                           'ACR':'ACR (Ohm)',
-                                         'dV/dt':'dV/dt (V/s)',
-                           'Internal_Resistance':'Internal_Resistance (Ohm)',
-                                         'dQ/dV':'dQ/dV (Ah/V)',
-                                         'dV/dQ':'dV/dQ (V/Ah)' }, inplace=True)
+        #erged_df.rename(columns={  'Data_Point':'Data_Point',
+        #                            'Date_Time':'Date_Time',
+        #                            'Test_Time':'Test_Times (s)',
+        #                            'Step_Time':'Step_Times (s)',
+        #                             'Cycle_ID':'Cycle_Index',
+        #                              'Step_ID':'Step_Index',
+        #                              'Current':'Current (A)',
+        #                              'Voltage':'Voltage (V)',
+        #                      'Charge_Capacity':'Charge_Capacity (Ah)',
+        #                   'Discharge_Capacity':'Discharge_Capacity (Ah)',
+        #                        'Charge_Energy':'Charge_Energy (Wh)',
+        #                     'Discharge_Energy':'Discharge_Energy (Wh)',
+        #                                  'ACR':'ACR (Ohm)',
+        #                                'dV/dt':'dV/dt (V/s)',
+        #                  'Internal_Resistance':'Internal_Resistance (Ohm)',
+        #                                'dQ/dV':'dQ/dV (Ah/V)',
+        #                                'dV/dQ':'dV/dQ (V/Ah)' }, inplace=True)
         
-        return merged_df
+        #return merged_df
 
-
-    def get_aux_data( self ):
-        data_auxiliary_df = self.arbin_database.data_auxiliary( self.testID )
-        return data_auxiliary_df
         
     def merge_raw_data( self ):
-        merged_df = pd.concat( [self.basic_extended_data_df, self.aux_data_df], axis=1 )
-        #merged_df = pd.merge( self.raw_data_df, self.aux_data_df, how='inner', left_index=True, right_index=True)
+        
+        offset = 0
+        num_aux = self.aux_data_df['Date_Time_Aux'].count()
+        num_raw = self.basic_extended_data_df['Date_Time'].count()
+
+        for index, row in self.basic_extended_data_df.iterrows():
+            if( index < num_aux ):
+                aux_time = self.aux_data_df.loc[index-offset, 'Date_Time_Aux']
+                be_time = row['Date_Time']
+                
+                if( aux_time > be_time ):
+                    self.aux_data_df.loc[index-offset+0.5] = self.aux_data_df.iloc[index-offset]
+                    offset += 1
+
+
+        self.aux_data_df = self.aux_data_df.sort_index()
+        self.aux_data_df = self.aux_data_df.reset_index(drop=True) 
         #merged_df = merged_df.drop( columns=['Date_Time_Aux'] )
+        
+        
+        merged_df = pd.concat( [self.basic_extended_data_df, self.aux_data_df], axis=1 )
         return merged_df
-    
+        
     
     def count_raw_data( self ):
         return self.raw_data_df['Data_Point'].count()
