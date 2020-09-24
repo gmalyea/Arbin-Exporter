@@ -80,7 +80,7 @@ class ArbinTest( object ):
                             'Schedule File Name': row['Schedule_File_Name'],
                                        'Creator': test_list_df.at[0,'Creator'],
                                       'Comments': test_list_df.at[0,'Comment'],
-                              'Software Version': test_list_df.at[0,'Software_Version'], # ??? DO I WANT TO GET THIS THIS WAY???
+                              'Software Version': test_list_df.at[0,'Software_Version'],
                               'Schedule Version': row['Schedule_Version'],
                                       'MASS (g)': row['SpecificMASS'],
                       'Specific Capacity (Ah/g)': row['SpecificCapacity'],
@@ -99,89 +99,78 @@ class ArbinTest( object ):
     def get_raw_data( self ):
         data_basic_df = self.arbin_database.data_basic( self.testID )
         data_extended_df = self.arbin_database.data_extended( self.testID )
-        merged_df = pd.merge( data_basic_df, data_extended_df, on='Date_Time', how='outer' )
-        
         data_auxiliary_df = self.arbin_database.data_auxiliary( self.testID )
+        basic_extended_df = pd.merge( data_basic_df, data_extended_df, on='Date_Time', how='outer' )
+        
+        rows_list = []
+        for index, row in basic_extended_df.iterrows():
+            dict_values = {       'Data_Point': row['Data_Point'],
+                                   'Date_Time': row['Date_Time'],
+                              'Test_Times (s)': row['Test_Time'],
+                              'Step_Times (s)': row['Step_Time'],
+                                 'Cycle_Index': row['Cycle_ID'],
+                                  'Step_Index': row['Step_ID'],
+                                 'Current (A)': row['Current'],
+                                 'Voltage (V)': row['Voltage'],
+                                   'Power (W)': '', # Calculated Value
+                        'Charge_Capacity (Ah)': row['Charge_Capacity'],
+                     'Discharge_Capacity (Ah)': row['Discharge_Capacity'],
+                          'Charge_Energy (Wh)': row['Charge_Energy'],
+                       'Discharge_Energy (Wh)': row['Discharge_Energy'],
+                                   'ACR (Ohm)': row['ACR'],
+                                 'dV/dt (V/s)': row['dV/dt'],
+                   'Internal_Resistance (Ohm)': row['Internal_Resistance'],
+                                'dQ/dV (Ah/V)': row['dQ/dV'],
+                                'dV/dQ (V/Ah)': row['dV/dQ'] }
+            
+            rows_list.append( dict_values )
+        
+        basic_extended_df = pd.DataFrame( rows_list )
         
         # Lineup basic and auxiliary date_times
-        #offset = 0
-        #num_aux = data_auxiliary_df['Date_Time_Aux'].count()
-        #num_merged = merged_df['Date_Time'].count()
-#
-        #for index, row in merged_df.iterrows():
-        #    #if( index < num_aux ):
-        #    aux_time = data_auxiliary_df.loc[index-offset, 'Date_Time_Aux']
-        #    be_time = row['Date_Time']
-        #    
-        #    if( aux_time > be_time ):
-        #        data_auxiliary_df.loc[index-offset+0.5] = data_auxiliary_df.iloc[index-offset]
-        #        offset += 1
-#
-        #data_auxiliary_df = data_auxiliary_df.sort_index()
-        #data_auxiliary_df = data_auxiliary_df.reset_index(drop=True) 
-        ##merged_df = merged_df.drop( columns=['Date_Time_Aux'] )
+        num_basic_extended = basic_extended_df['Date_Time'].count()
+        num_aux = data_auxiliary_df['Date_Time_Aux'].count()
         
+        if( num_basic_extended > num_aux ):
+            offset = 0
+            for index, row in basic_extended_df.iterrows():
+                #print(str(index) + " | " + str(offset))
+                aux_time = data_auxiliary_df.loc[index-offset, 'Date_Time_Aux']
+                basic_extended_time = row['Date_Time']
+                
+                if( aux_time > basic_extended_time ):
+                    #if( (index-offset+0.5) in data_auxiliary_df.index ):
+                    #    data_auxiliary_df.loc[index-offset+0.6] = data_auxiliary_df.iloc[index-offset]
+                    #else:
+                    #    data_auxiliary_df.loc[index-offset+0.5] = data_auxiliary_df.iloc[index-offset]
+                    print(str(index) + " " + str(data_auxiliary_df.iloc[index-offset]))
+                    data_auxiliary_df.loc[index-offset+(0.0001*(offset+1))] = data_auxiliary_df.iloc[index-offset]
+                    offset += 1
+                    #print( offset )
+            
+                #if( offset == (num_basic_extended-num_aux) ):
+                #    print( "final: " + str(offset) )
+                #    break
+            
+            #num_aux_new = data_auxiliary_df['Date_Time_Aux'].count()
+            #for _ in range(num_basic_extended-num_aux_new):
+            #    data_auxiliary_df.loc[index-offset+0.5] = data_auxiliary_df.iloc[index-offset]
+            #    offset += 1
+         
+            data_auxiliary_df = data_auxiliary_df.sort_index()
+            data_auxiliary_df = data_auxiliary_df.reset_index(drop=True) 
+            #data_auxiliary_df = data_auxiliary_df.drop( columns=['Date_Time_Aux'] )
         
-        merged_df = pd.concat( [merged_df, data_auxiliary_df], axis=1 )
+        print("===========================")
+        print(basic_extended_df['Date_Time'].count())
+        print(data_auxiliary_df['Date_Time_Aux'].count())
+        
+        merged_df = pd.concat( [basic_extended_df, data_auxiliary_df], axis=1 )
         return merged_df
         
         
         
-        
-        
-        
-        
-        #merged_df = pd.concat( [merged_df, data_auxiliary_df], axis=1 )
-        
-        #rows_list = []
-        #for index, row in merged_df.iterrows():
-        #    dict_values = {         'Data_Point': row['Data_Point'],
-        #                             'Date_Time': row['Date_Time'],
-        #                         'Test_Times (s)': row['Test_Time'],
-        #                         'Step_Times (s)': row['Step_Time'],
-        #                           'Cycle_Index': row['Cycle_ID'],
-        #                            'Step_Index': row['Step_ID'],
-        #                            'Current (A)': row['Current'],
-        #                            'Voltage (V)': row['Voltage'],
-        #                              'Power (W)': '', # Calculated Value
-        #                   'Charge_Capacity (Ah)': row['Charge_Capacity'],
-        #                'Discharge_Capacity (Ah)': row['Discharge_Capacity'],
-        #                     'Charge_Energy (Wh)': row['Charge_Energy'],
-        #                  'Discharge_Energy (Wh)': row['Discharge_Energy'],
-        #                              'ACR (Ohm)': row['ACR'],
-        #                            'dV/dt (V/s)': row['dV/dt'],
-        #              'Internal_Resistance (Ohm)': row['Internal_Resistance'],
-        #                           'dQ/dV (Ah/V)': row['dQ/dV'],
-        #                           'dV/dQ (V/Ah)': row['dV/dQ'] }
-        #    
-        #    #for column in list( data_auxiliary_df.columns ):
-        #        #dict_values[column] = row[column]
-        #    
-        #    rows_list.append( dict_values )
-        #    
-        #    return pd.DataFrame( rows_list )
-        
-        #erged_df.rename(columns={  'Data_Point':'Data_Point',
-        #                            'Date_Time':'Date_Time',
-        #                            'Test_Time':'Test_Times (s)',
-        #                            'Step_Time':'Step_Times (s)',
-        #                             'Cycle_ID':'Cycle_Index',
-        #                              'Step_ID':'Step_Index',
-        #                              'Current':'Current (A)',
-        #                              'Voltage':'Voltage (V)',
-        #                      'Charge_Capacity':'Charge_Capacity (Ah)',
-        #                   'Discharge_Capacity':'Discharge_Capacity (Ah)',
-        #                        'Charge_Energy':'Charge_Energy (Wh)',
-        #                     'Discharge_Energy':'Discharge_Energy (Wh)',
-        #                                  'ACR':'ACR (Ohm)',
-        #                                'dV/dt':'dV/dt (V/s)',
-        #                  'Internal_Resistance':'Internal_Resistance (Ohm)',
-        #                                'dQ/dV':'dQ/dV (Ah/V)',
-        #                                'dV/dQ':'dV/dQ (V/Ah)' }, inplace=True)
-        
-        #return merged_df
-
-        
+   
     def merge_raw_data( self ):
         
         offset = 0
