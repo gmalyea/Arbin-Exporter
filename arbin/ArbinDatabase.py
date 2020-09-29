@@ -230,8 +230,6 @@ class ArbinDatabase( object ):
                 reference_time = row['Date_Time_Aux']
             
                 if( fix_time > reference_time ):
-                    print( "Aux: " + str(index) )
-                    print(list_aux_df[df_to_fix].iloc[index-offset])
                     list_aux_df[df_to_fix].loc[index-offset+0.5] = list_aux_df[df_to_fix].iloc[index-offset]
                     offset += 1
                     
@@ -246,8 +244,6 @@ class ArbinDatabase( object ):
         df_combined = pd.DataFrame()
         for table in list_aux_df:
             df_combined = pd.concat( [df_combined, table], axis=1 )
-        
-        print("=========================")
         
         return df_combined
         
