@@ -99,7 +99,6 @@ class ArbinTest( object ):
     def get_raw_data( self ):
         data_basic_df = self.arbin_database.data_basic( self.testID )
         data_extended_df = self.arbin_database.data_extended( self.testID )
-        data_auxiliary_df = self.arbin_database.data_auxiliary( self.testID )
         basic_extended_df = pd.merge( data_basic_df, data_extended_df, on='Date_Time', how='outer' )
         
         rows_list = []
@@ -125,8 +124,63 @@ class ArbinTest( object ):
             
             rows_list.append( dict_values )
         
-        basic_extended_df = pd.DataFrame( rows_list )
+        merged_df = pd.DataFrame( rows_list )
         
+        
+        
+        
+        # Aux Data
+        list_auxiliary_df = self.arbin_database.data_auxiliary( self.testID )
+        
+        # Lineup each auxiliary table with the basic-extended table by date_times
+        num_basic_extended = merged_df['Date_Time'].count()
+        
+        for aux_df in list_auxiliary_df: 
+            num_aux = aux_df['Date_Time_Aux'].count()
+            
+            if( num_basic_extended > num_aux ):
+                offset = 0
+                base_shift = 1 / (num_aux + 1)
+                shift = base_shift
+                
+                for index, row in merged_df.iterrows():
+                    basic_extended_time = row['Date_Time']
+                    aux_time = aux_df.loc[index-offset, 'Date_Time_Aux']
+                    
+                    #time_delta = aux_time - basic_extended_time
+                    #time_delta_before = aux_time_before - basic_extended_time
+                    
+                    if( index == 10000 ):
+                        break
+                        
+                    if( aux_time > basic_extended_time ):
+                        aux_df.loc[index-offset+shift] = aux_df.iloc[index-offset]
+                        offset += 1
+                        shift += base_shift
+                        
+                aux_df = aux_df.sort_index()
+                aux_df = aux_df.reset_index(drop=True) 
+                #aux_df = aux_df.drop( columns=['Date_Time_Aux'] )
+                
+                pd.options.display.float_format = '{:.1f}'.format
+                print(merged_df[:28])
+                print(aux_df[:28])
+                
+                diff = merged_df["Date_Time"] - aux_df["Date_Time_Aux"]
+                print(diff[:28])
+                #print(merged_df[8115:8125])
+                #print(aux_df[8110:8120])
+                
+            exit()    
+            merged_df = pd.concat( [merged_df, aux_df], axis=1 )
+            
+        
+        #for aux_df in list_auxiliary_df:
+        #    print(aux_df.info(verbose=True))
+        #    print(aux_df)
+        
+        
+        #print(merged_df)
        # # Lineup basic and auxiliary date_times
        # num_basic_extended = basic_extended_df['Date_Time'].count()
        # num_aux = data_auxiliary_df['Date_Time_Aux'].count()
@@ -161,60 +215,60 @@ class ArbinTest( object ):
        #     data_auxiliary_df = data_auxiliary_df.reset_index(drop=True) 
        #     #data_auxiliary_df = data_auxiliary_df.drop( columns=['Date_Time_Aux'] )
         
-        print(basic_extended_df[:25])
-        print(data_auxiliary_df[:25])
+        #print(basic_extended_df[:25])
+        #print(data_auxiliary_df[:25])
         #print(basic_extended_df[8115:8125])
         #print(data_auxiliary_df[8110:8120])
         # Need to add an extra Aux line for every Cycle_Index
         # Also, add one at the beginning and end
         
-        data_auxiliary_df.loc[0.5] = data_auxiliary_df.iloc[0]
+#        data_auxiliary_df.loc[0.5] = data_auxiliary_df.iloc[0]
+#        
+#        
+#        cycle_index = 1
+#        offset = 1
+#        for index, row in basic_extended_df.iterrows():
+#            if( cycle_index != row['Cycle_Index'] ):
+#                cycle_index = row['Cycle_Index']
+#                
+#                
+#                data_auxiliary_df.loc[index-offset+0.5] = data_auxiliary_df.iloc[index-offset]
+#                offset += 1
+#                    
+#                    
+#                    
+#        
+#                #aux_time = data_auxiliary_df.loc[index-offset, 'Date_Time_Aux']
+#                #basic_extended_time = row['Date_Time']
+#                
+#                #if( aux_time > basic_extended_time ):
+#                    #if( (index-offset+0.5) in data_auxiliary_df.index ):
+#                    #    data_auxiliary_df.loc[index-offset+0.6] = data_auxiliary_df.iloc[index-offset]
+#                    #else:
+#                    #    data_auxiliary_df.loc[index-offset+0.5] = data_auxiliary_df.iloc[index-offset]
+#                    #print(str(index) + " " + str(data_auxiliary_df.iloc[index-offset]))
+#                    #data_auxiliary_df.loc[index-offset+(0.0001*(offset+1))] = data_auxiliary_df.iloc[index-offset]
+#                    #offset += 1
+#                    #print( offset )
+#        
+#        
+#        # Add end
+#        num_aux = data_auxiliary_df['Date_Time_Aux'].count()
+#        data_auxiliary_df.loc[num_aux] = data_auxiliary_df.iloc[num_aux-1]
+#        
+#        data_auxiliary_df = data_auxiliary_df.sort_index()
+#        data_auxiliary_df = data_auxiliary_df.reset_index(drop=True)
+#        
         
         
-        cycle_index = 1
-        offset = 1
-        for index, row in basic_extended_df.iterrows():
-            if( cycle_index != row['Cycle_Index'] ):
-                cycle_index = row['Cycle_Index']
-                
-                
-                data_auxiliary_df.loc[index-offset+0.5] = data_auxiliary_df.iloc[index-offset]
-                offset += 1
-                    
-                    
-                    
-        
-                #aux_time = data_auxiliary_df.loc[index-offset, 'Date_Time_Aux']
-                #basic_extended_time = row['Date_Time']
-                
-                #if( aux_time > basic_extended_time ):
-                    #if( (index-offset+0.5) in data_auxiliary_df.index ):
-                    #    data_auxiliary_df.loc[index-offset+0.6] = data_auxiliary_df.iloc[index-offset]
-                    #else:
-                    #    data_auxiliary_df.loc[index-offset+0.5] = data_auxiliary_df.iloc[index-offset]
-                    #print(str(index) + " " + str(data_auxiliary_df.iloc[index-offset]))
-                    #data_auxiliary_df.loc[index-offset+(0.0001*(offset+1))] = data_auxiliary_df.iloc[index-offset]
-                    #offset += 1
-                    #print( offset )
-        
-        
-        # Add end
-        num_aux = data_auxiliary_df['Date_Time_Aux'].count()
-        data_auxiliary_df.loc[num_aux] = data_auxiliary_df.iloc[num_aux-1]
-        
-        data_auxiliary_df = data_auxiliary_df.sort_index()
-        data_auxiliary_df = data_auxiliary_df.reset_index(drop=True)
         
         
         
+#        print("===========================")
+#        print(basic_extended_df['Date_Time'].count())
+#        print(data_auxiliary_df['Date_Time_Aux'].count())
         
-        
-        
-        print("===========================")
-        print(basic_extended_df['Date_Time'].count())
-        print(data_auxiliary_df['Date_Time_Aux'].count())
-        
-        merged_df = pd.concat( [basic_extended_df, data_auxiliary_df], axis=1 )
+#        merged_df = pd.concat( [basic_extended_df, data_auxiliary_df], axis=1 )
         return merged_df
         
         

@@ -154,7 +154,7 @@ class ArbinDatabase( object ):
         databases = self.list_data_databases_for( testID )
         
         # Query each data pair
-        df_combined = pd.DataFrame()
+        #df_combined = pd.DataFrame()
         list_aux_df = []
         
         for pair in auxiliary_type_channel_pairs:
@@ -198,55 +198,57 @@ class ArbinDatabase( object ):
                 
             list_aux_df.append( df_aux )
             
-        # Find the biggest Aux Table
-        df_sorter = pd.DataFrame( columns=('index', 'count') )
-        for index, aux_df in enumerate(list_aux_df):
-            row_count =  aux_df['Date_Time_Aux'].count()
-            
-            new_row = { 'index':index, 'count':row_count }
-            df_sorter = df_sorter.append( new_row, ignore_index=True )
-            
-        # Find which tables need fixing
-        df_sorter.sort_values( 'count' )
-        reference_aux = df_sorter.loc[0, 'index' ]
-        largest_count = df_sorter.loc[0, 'count' ]
-        df_need_fixing = df_sorter[df_sorter['count'] < largest_count]
-        
-        list_need_fixing = []
-        for i, row in df_need_fixing.iterrows():
-            list_need_fixing.append( row['index'] )
-        
-        
-        # Fix the tables
-        num_reference = largest_count
-        
-        for i, row in df_need_fixing.iterrows():  
-            offset = 0
-            df_to_fix = row['index']
-            num_fix = row['count']
-            for index, row in list_aux_df[reference_aux].iterrows():
-                #if( index < num_aux ):
-                fix_time = list_aux_df[df_to_fix].loc[index-offset, 'Date_Time_Aux']
-                reference_time = row['Date_Time_Aux']
-            
-                if( fix_time > reference_time ):
-                    list_aux_df[df_to_fix].loc[index-offset+0.5] = list_aux_df[df_to_fix].iloc[index-offset]
-                    offset += 1
-                    
-                if( offset == (num_reference-num_fix) ):
-                    break
 
-            list_aux_df[df_to_fix] = list_aux_df[df_to_fix].sort_index()
-            list_aux_df[df_to_fix] = list_aux_df[df_to_fix].reset_index(drop=True) 
-            list_aux_df[df_to_fix] = list_aux_df[df_to_fix].drop( columns=['Date_Time_Aux'] )
+        ## Find the biggest Aux Table
+        #df_sorter = pd.DataFrame( columns=('index', 'count') )
+        #for index, aux_df in enumerate(list_aux_df):
+        #    row_count =  aux_df['Date_Time_Aux'].count()
+        #    
+        #    new_row = { 'index':index, 'count':row_count }
+        #    df_sorter = df_sorter.append( new_row, ignore_index=True )
+            
+        ## Find which tables need fixing
+        #df_sorter.sort_values( 'count' )
+        #reference_aux = df_sorter.loc[0, 'index' ]
+        #largest_count = df_sorter.loc[0, 'count' ]
+        #df_need_fixing = df_sorter[df_sorter['count'] < largest_count]
+        
+        #list_need_fixing = []
+        #for i, row in df_need_fixing.iterrows():
+        #    list_need_fixing.append( row['index'] )
         
         
-        df_combined = pd.DataFrame()
-        for table in list_aux_df:
-            df_combined = pd.concat( [df_combined, table], axis=1 )
+        ## Fix the tables
+        #num_reference = largest_count
+        #
+        #for i, row in df_need_fixing.iterrows():  
+        #    offset = 0
+        #    df_to_fix = row['index']
+        #    num_fix = row['count']
+        #    for index, row in list_aux_df[reference_aux].iterrows():
+        #        #if( index < num_aux ):
+        #        fix_time = list_aux_df[df_to_fix].loc[index-offset, 'Date_Time_Aux']
+        #        reference_time = row['Date_Time_Aux']
+        #    
+        #        if( fix_time > reference_time ):
+        #            list_aux_df[df_to_fix].loc[index-offset+0.5] = list_aux_df[df_to_fix].iloc[index-offset]
+        #            offset += 1
+        #            
+        #        if( offset == (num_reference-num_fix) ):
+        #            break
+        #
+        #    list_aux_df[df_to_fix] = list_aux_df[df_to_fix].sort_index()
+        #    list_aux_df[df_to_fix] = list_aux_df[df_to_fix].reset_index(drop=True) 
+        #    list_aux_df[df_to_fix] = list_aux_df[df_to_fix].drop( columns=['Date_Time_Aux'] )
+        #
+        #
+        #df_combined = pd.DataFrame()
+        #for table in list_aux_df:
+        #    df_combined = pd.concat( [df_combined, table], axis=1 )
         
-        return df_combined
-        
+
+        #return df_combined
+        return list_aux_df
         
         
     # --------------------------------------------------------------------------------------
