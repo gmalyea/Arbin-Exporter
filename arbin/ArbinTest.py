@@ -136,48 +136,65 @@ class ArbinTest( object ):
         num_basic_extended = merged_df['Date_Time'].count()
         
         for aux_df in list_auxiliary_df: 
-            if( 1 == 0 ):
-                num_aux = aux_df['Date_Time_Aux'].count()
-                df = pd.DataFrame()
-                offset = 0
+            num_aux = aux_df['Date_Time_Aux'].count()
+            df = pd.DataFrame()
+            offset = 0
+        
+            # Complicated version
+            # ====================================================
+            base_shift = 1 / (num_aux + 1)
+            offset_shift = base_shift
+        
+            for index, row in merged_df.iterrows():
+                basic_extended_time = row['Date_Time']
+                aux_time = aux_df.loc[index-offset, 'Date_Time_Aux']
+                if( index-offset < 1 ):
+                    aux_time_previous = 0
+                else:
+                    aux_time_previous = aux_df.loc[index-offset-1, 'Date_Time_Aux']
             
-                for index, row in merged_df.iterrows():
-                    basic_extended_time = row['Date_Time']
-                    aux_time = aux_df.loc[index-offset, 'Date_Time_Aux']
-                    if( index-offset < 1 ):
-                        aux_time_previous = 0
+                if( index-offset >= num_aux-1 ):
+                    aux_time_next = 0
+                else:
+                    aux_time_next = aux_df.loc[index-offset+1, 'Date_Time_Aux']
+            
+                time_delta = abs(aux_time - basic_extended_time)
+                time_delta_previous = abs(aux_time_previous - basic_extended_time)
+                time_delta_next = abs(aux_time_next - basic_extended_time)
+            
+                #time_delta_df = pd.DataFrame([[0,time_delta],[1,time_delta_previous],[-1,time_delta_next]])
+                #time_delta_df = time_delta_df.sort_values(by=[1])
+                #smallest_time_delta = time_delta_df.iloc[0,0]
+                
+                time_shift = 0
+                if( time_delta_previous < time_delta ):
+                    if( time_delta_previous < time_delta_next ):
+                        time_shift = 1
                     else:
-                        aux_time_previous = aux_df.loc[index-offset-1, 'Date_Time_Aux']
+                        time_shift = -1
+                elif( time_delta_next < time_delta ):
+                    time_shift = -1
                 
-                    if( index-offset >= num_aux-1 ):
-                        aux_time_next = 0
-                    else:
-                        aux_time_next = aux_df.loc[index-offset+1, 'Date_Time_Aux']
-                
-                    time_delta = abs(aux_time - basic_extended_time)
-                    time_delta_previous = abs(aux_time_previous - basic_extended_time)
-                    time_delta_next = abs(aux_time_next - basic_extended_time)
-                
-                    time_delta_df = pd.DataFrame([[0,time_delta],[1,time_delta_previous],[-1,time_delta_next]])
-                    time_delta_df = time_delta_df.sort_values(by=[1])
-                    smallest_time_delta = time_delta_df.iloc[0,0]
+                # Easy version - but is it slow? ~6 min
+                # ====================================================
+                #offset += time_shift
+                #df = df.append([aux_df.iloc[index-offset]], ignore_index=True)
+                #offset += 1
                 
                 
-                # TEMP
-                #if( index == 1000 ):
-                #    break
-           #     offset += smallest_time_delta
-           #     df = df.append([aux_df.iloc[index-offset]], ignore_index=True)
+                # Complicated version
+                # ====================================================
+                if( time_shift == -1 ):
+                    aux_df.loc[index-offset+offset_shift] = aux_df.iloc[index-offset]
+                    offset += 1
+                    offset_shift += base_shift
                 
-           #     offset += 1
-                
-                
-                #if( aux_time > basic_extended_time ):
-                #    aux_df.loc[index-offset+shift] = aux_df.iloc[index-offset]
-                #    offset += 1
-                #    shift += base_shift
+                elif( time_shift == 1 ):
+                    aux_df.loc[index-offset+offset_shift] = aux_df.iloc[index-offset]
+                    offset -= 1
+                    offset_shift += base_shift
                     
-            #aux_df = aux_df.sort_index()
+            aux_df = aux_df.sort_index()
             #aux_df = aux_df.reset_index(drop=True) 
             #aux_df = aux_df.drop( columns=['Date_Time_Aux'] )
             
@@ -190,8 +207,8 @@ class ArbinTest( object ):
             #print(merged_df[8115:8125])
             #print(aux_df[8110:8120])
                 
-              
             merged_df = pd.concat( [merged_df, aux_df], axis=1 )
+            #merged_df = pd.concat( [merged_df, df], axis=1 )
             
         
         #for aux_df in list_auxiliary_df:
