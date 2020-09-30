@@ -136,42 +136,61 @@ class ArbinTest( object ):
         num_basic_extended = merged_df['Date_Time'].count()
         
         for aux_df in list_auxiliary_df: 
-            num_aux = aux_df['Date_Time_Aux'].count()
-            
-            if( num_basic_extended > num_aux ):
+            if( 1 == 0 ):
+                num_aux = aux_df['Date_Time_Aux'].count()
+                df = pd.DataFrame()
                 offset = 0
-                base_shift = 1 / (num_aux + 1)
-                shift = base_shift
-                
+            
                 for index, row in merged_df.iterrows():
                     basic_extended_time = row['Date_Time']
                     aux_time = aux_df.loc[index-offset, 'Date_Time_Aux']
+                    if( index-offset < 1 ):
+                        aux_time_previous = 0
+                    else:
+                        aux_time_previous = aux_df.loc[index-offset-1, 'Date_Time_Aux']
+                
+                    if( index-offset >= num_aux-1 ):
+                        aux_time_next = 0
+                    else:
+                        aux_time_next = aux_df.loc[index-offset+1, 'Date_Time_Aux']
+                
+                    time_delta = abs(aux_time - basic_extended_time)
+                    time_delta_previous = abs(aux_time_previous - basic_extended_time)
+                    time_delta_next = abs(aux_time_next - basic_extended_time)
+                
+                    time_delta_df = pd.DataFrame([[0,time_delta],[1,time_delta_previous],[-1,time_delta_next]])
+                    time_delta_df = time_delta_df.sort_values(by=[1])
+                    smallest_time_delta = time_delta_df.iloc[0,0]
+                
+                
+                # TEMP
+                #if( index == 1000 ):
+                #    break
+           #     offset += smallest_time_delta
+           #     df = df.append([aux_df.iloc[index-offset]], ignore_index=True)
+                
+           #     offset += 1
+                
+                
+                #if( aux_time > basic_extended_time ):
+                #    aux_df.loc[index-offset+shift] = aux_df.iloc[index-offset]
+                #    offset += 1
+                #    shift += base_shift
                     
-                    #time_delta = aux_time - basic_extended_time
-                    #time_delta_before = aux_time_before - basic_extended_time
-                    
-                    if( index == 10000 ):
-                        break
-                        
-                    if( aux_time > basic_extended_time ):
-                        aux_df.loc[index-offset+shift] = aux_df.iloc[index-offset]
-                        offset += 1
-                        shift += base_shift
-                        
-                aux_df = aux_df.sort_index()
-                aux_df = aux_df.reset_index(drop=True) 
-                #aux_df = aux_df.drop( columns=['Date_Time_Aux'] )
+            #aux_df = aux_df.sort_index()
+            #aux_df = aux_df.reset_index(drop=True) 
+            #aux_df = aux_df.drop( columns=['Date_Time_Aux'] )
+            
+      #      pd.options.display.float_format = '{:.1f}'.format
+      #      print(merged_df[:28])
+      #      print(df[:28])
+            
+       #     diff = merged_df["Date_Time"] - df["Date_Time_Aux"]
+       #     print(diff[:28])
+            #print(merged_df[8115:8125])
+            #print(aux_df[8110:8120])
                 
-                pd.options.display.float_format = '{:.1f}'.format
-                print(merged_df[:28])
-                print(aux_df[:28])
-                
-                diff = merged_df["Date_Time"] - aux_df["Date_Time_Aux"]
-                print(diff[:28])
-                #print(merged_df[8115:8125])
-                #print(aux_df[8110:8120])
-                
-            exit()    
+              
             merged_df = pd.concat( [merged_df, aux_df], axis=1 )
             
         
