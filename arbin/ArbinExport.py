@@ -44,19 +44,10 @@ class ArbinExport( object ):
             wb = ArbinWorkbook(file_name)
             
             self.export_global_info_sheet( wb.ws1 )
-            #self.export_channel_sheet( wb.ws2, wb_num )
+            self.export_channel_sheet( wb.ws2, wb_num )
             self.export_statistics_sheet( wb.ws3 )
-            self.export_aux_sheet( wb.ws4 )
             
             self.wb_list.append( wb )
-
-
-        # Change Timezone
-        #self.global_info_df = self.convert_date_time( self.global_info_df, 'Start DateTime', 's', 1 )
-        #self.raw_data_df = self.convert_date_time( self.raw_data_df, 'Date_Time', 'ns', 100 )
-        #self.cycle_statistics_df = self.convert_date_time( self.cycle_statistics_df, 'Date_Time', 'ns', 100 )
-        #self.raw_aux_data_df = self.convert_date_time( self.raw_aux_data_df, 'Date_Time', 'ns', 100 )
-
 
 
     def save_workbook( self, path ):
@@ -68,13 +59,15 @@ class ArbinExport( object ):
         test_name = self.ArbinTest.test_name
         arbin_number = self.ArbinTest.arbin_number
         current_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-            
-        #worksheet.append(['','','','TEST REPORT','Processed by exporter.py'])
+        
         worksheet.append(['Processed by exporter.py','','','TEST REPORT'])
         worksheet.append(['','','Test Name',test_name,'Serial Number'])
         worksheet.append(['','','Export Time',current_date,arbin_number])
         
         df = self.ArbinTest.global_info_df
+        
+        # Change Timezone and Format Date-Time
+        df = self.convert_date_time( df, 'Start DateTime', 's', 1 )
         
         for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
             worksheet.append( row )
@@ -94,22 +87,11 @@ class ArbinExport( object ):
     def export_channel_sheet( self, worksheet, wb_num ):
         datapoint_start = wb_num * MAXDATAPOINTS
         datapoint_end = datapoint_start + MAXDATAPOINTS
-    
+      
         df = self.ArbinTest.raw_data_df.iloc[datapoint_start:datapoint_end]
         
-        for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
-            worksheet.append( row )
-    
-        # Format Cells
-        ArbinWorkbook.background_color( worksheet, 0, 'CEFFFF' ) # Blue 
-        ArbinWorkbook.border_bottom( worksheet, 0 )
-        ArbinWorkbook.resize_cells( worksheet, slice(0,2) )
-
-
-    def export_aux_sheet( self, worksheet ):        
-        #df = self.convert_date_time( self.ArbinTest.raw_data_df, 'Date_Time', 'ns', 100 )
-        #df = self.convert_date_time( df, 'Date_Time_Aux', 'ns', 100 )
-        df = self.ArbinTest.raw_data_df
+        # Change Timezone and Format Date-Time
+        df = self.convert_date_time( df, 'Date_Time', 'ns', 100 )
         
         for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
             worksheet.append( row )
@@ -122,6 +104,9 @@ class ArbinExport( object ):
     
     def export_statistics_sheet( self, worksheet ):
         df = self.ArbinTest.cycle_statistics_df
+        
+        # Change Timezone and Format Date-Time
+        df = self.convert_date_time( df, 'Date_Time', 'ns', 100 )
         
         for row in openpyxl.utils.dataframe.dataframe_to_rows( df, index=False, header=True ):
             worksheet.append( row )

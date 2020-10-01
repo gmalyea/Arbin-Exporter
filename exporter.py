@@ -35,6 +35,7 @@ from arbin.ArbinExport import ArbinExport
 #
 # QUESTIONS
 # - If two test have same name, overwrite? - concatenate tests
+# - Aux_Pressure/dt_1(PSI) not in database
 # =============================================================================
 
 
