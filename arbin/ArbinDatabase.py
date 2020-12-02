@@ -113,7 +113,6 @@ class ArbinDatabase( object ):
         return df_combined
         
 
-    
     def data_extended( self, testID ):
         query = ( "SELECT [Date_Time], [6] as [ACR], [27] as [dV/dt],[30] as [Internal_Resistance], [82] as [dQ/dV], [83] as [dV/dQ] "
                     "FROM (SELECT * FROM IV_Extended_Table WHERE [Test_ID] = " + str(testID) + ") as tbl "

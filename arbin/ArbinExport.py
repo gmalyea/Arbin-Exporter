@@ -131,3 +131,4 @@ class ArbinExport( object ):
         df[column_name] = pd.DatetimeIndex(df[column_name]).strftime('%Y-%m-%d %H:%M:%S.%f')
         
         return df
+        

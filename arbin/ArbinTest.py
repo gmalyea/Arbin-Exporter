@@ -13,10 +13,6 @@ from arbin.ArbinDatabase import ArbinDatabase
 #
 # =============================================================================
 
-# Constants
-# -----------------------------------------------------------------------------
-TIMEZONE = -5 # Hours
-
 
 class ArbinTest( object ):
     
@@ -212,20 +208,3 @@ class ArbinTest( object ):
 
         return pd.DataFrame( rows_list )
         
-
-
-    # --------------------------------------------------------------------------------------
-    # Utilities
-    # --------------------------------------------------------------------------------------
-    @staticmethod
-    def convert_date_time( df, column_name, unit, multiplier ):
-        df[column_name] = df[column_name].apply( lambda x: x * multiplier )
-        df[column_name] = pd.to_datetime(df[column_name], unit=unit, errors = 'coerce' )
-        # Offset for timezone
-        df[column_name] = df[column_name] + pd.DateOffset(hours=TIMEZONE)
-        # Change to string to keep precision when going to Excel
-        df[column_name] = pd.DatetimeIndex(df[column_name]).strftime('%Y-%m-%d %H:%M:%S.%f')
-        
-        return df
-    
-    

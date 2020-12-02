@@ -11,6 +11,11 @@ from arbin.ArbinExport import ArbinExport
 # =============================================================================
 # Exporter
 # -----------------------------------------------------------------------------
+#
+# Utility for exporting data from an Arbin Instruments battery test system 
+# SQL Server to an excel file.
+#
+#
 # Usage
 # -----------------------------------------------------------------------------
 # To get command-line help:
@@ -32,16 +37,15 @@ from arbin.ArbinExport import ArbinExport
 #
 # Issues
 # -----------------------------------------------------------------------------
-#
-# QUESTIONS
-# - If two test have same name, overwrite? - concatenate tests
+# - Two tests with the same name overwrite, should concatenate
 # - Aux_Pressure/dt_1(PSI) not in database
+#
 # =============================================================================
 
 
 # Constants
 # -----------------------------------------------------------------------------
-OUTPUTPATH = "../Exporter Output/"
+OUTPUTPATH = "../Arbin Exporter Output/"
 TESTDAYSIGNORE = 30 # Days
 
 
@@ -49,7 +53,7 @@ TESTDAYSIGNORE = 30 # Days
 # -----------------------------------------------------------------------------
 SERVER = 'localhost'
 USERNAME = 'sa'
-PASSWORD = 'Garret2020'
+PASSWORD = ''
 
 
 # Parse the Command-Line Arguments
