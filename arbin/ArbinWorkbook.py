@@ -4,11 +4,10 @@ import openpyxl
 # =============================================================================
 # ArbinWorkbook
 # -----------------------------------------------------------------------------
+# Copyright (c) 2020 Garret Alyea. All Rights Reserved.
 # 
+# ArbinWorkbook class handles writing an ArbinExport object to the filesystem. 
 # 
-# 
-# 
-#
 # =============================================================================
 
 

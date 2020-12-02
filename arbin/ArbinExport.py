@@ -11,10 +11,9 @@ from arbin.ArbinWorkbook import ArbinWorkbook
 # =============================================================================
 # ArbinExport
 # -----------------------------------------------------------------------------
+# Copyright (c) 2020 Garret Alyea. All Rights Reserved.
 # 
-# 
-# 
-# 
+# ArbinExport class formats data from ArbinTest for export to Excel.
 #
 # =============================================================================
 

@@ -5,7 +5,11 @@ from arbin.ArbinDatabase import ArbinDatabase
 # =============================================================================
 # ArbinTest
 # -----------------------------------------------------------------------------
+# Copyright (c) 2020 Garret Alyea. All Rights Reserved.
 # 
+# ArbinTest class encapsulates the data from one Arbin Test ID using
+# Pandas dataframes.
+#
 # Notes:
 #   DateTime columns are processed to change timezone from UTC.  Because
 #       DateTime columns are not the DataFrame index, they are also converted

@@ -8,12 +8,16 @@ from arbin.ArbinDatabase import ArbinDatabase
 from arbin.ArbinTest import ArbinTest
 from arbin.ArbinExport import ArbinExport
 
+
 # =============================================================================
 # Exporter
 # -----------------------------------------------------------------------------
+# Copyright (c) 2020 Garret Alyea. All Rights Reserved.
 #
 # Utility for exporting data from an Arbin Instruments battery test system 
 # SQL Server to an excel file.
+#
+# GitHub: www.github.com/gmalyea/Arbin-Exporter
 #
 #
 # Usage

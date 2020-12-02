@@ -6,6 +6,10 @@ import pandas as pd
 # =============================================================================
 # ArbinDatabase
 # -----------------------------------------------------------------------------
+# Copyright (c) 2020 Garret Alyea. All Rights Reserved.
+#
+# ArbinDatabase class handles connections to the Arbin SQL Server database.
+#
 # On initialization the following SQL Server connections are made:
 #   self.conn.master        (ArbinPro8MasterInfo)
 #   self.conn.data[]        (ArbinPro8Data_1, 2, etc)
